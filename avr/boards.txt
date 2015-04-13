@@ -1,8 +1,8 @@
-quirkbot.name=LilyPad Arduino USB
+quirkbot.name=Quirkbot
 quirkbot.vid.0=0xF055
-quirkbot.pid.0=0xF055
+quirkbot.pid.0=0x0001
 quirkbot.vid.1=0xF055
-quirkbot.pid.1=0xF055
+quirkbot.pid.1=0x0001
 
 quirkbot.upload.tool=avrdude
 quirkbot.upload.protocol=avr109
@@ -24,7 +24,7 @@ quirkbot.bootloader.lock_bits=0x2F
 quirkbot.build.mcu=atmega32u4
 quirkbot.build.f_cpu=8000000L
 quirkbot.build.vid=0xF055
-quirkbot.build.pid=0xF055
+quirkbot.build.pid=0x0001
 quirkbot.build.usb_product="Quirkbot"
 quirkbot.build.board=AVR_QUIRKBOT
 quirkbot.build.core=arduino
