@@ -1,8 +1,6 @@
 quirkbot.name=Quirkbot
 quirkbot.vid.0=0xF055
 quirkbot.pid.0=0x0001
-quirkbot.vid.1=0xF055
-quirkbot.pid.1=0x0001
 
 quirkbot.upload.tool=avrdude
 quirkbot.upload.protocol=avr109
