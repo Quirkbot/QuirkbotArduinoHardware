@@ -1,1 +1,12 @@
+.dep
 LUFA-111009
+Caterina.eep
+Caterina.elf
+Caterina.hex
+Caterina.lss
+Caterina.lst
+Caterina.map
+Caterina.o
+Caterina.sym
+Descriptors.lst
+Descriptors.o

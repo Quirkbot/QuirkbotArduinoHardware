@@ -49,12 +49,14 @@
 # USB vendor ID (VID)
 # official Arduino LLC VID = 0x2341
 # SparkFun VID = 0x1B4F
-VID = 0x1B4F
+# Quirkbot Laboratories VID = 0xF055
+VID = 0xF055
 
 # USB product ID (PID)
 # official Leonardo PID = 0x0036
 # SparkFun LilyPadUSB PID = 0x9207
-PID = 0x9207
+# Quirkbot PID = 0x0666
+PID = 0x0666
 
 # MCU name
 MCU = atmega32u4

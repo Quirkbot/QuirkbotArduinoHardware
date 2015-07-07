@@ -192,8 +192,8 @@ const USB_Descriptor_String_t LanguageString =
 const USB_Descriptor_String_t ProductString =
 {
 	.Header                 = {.Size = USB_STRING_LEN(16), .Type = DTYPE_String},
-	#if DEVICE_PID == 0x9207
-	.UnicodeString          = L"LilyPadUSB      " 
+	#if DEVICE_PID == 0x0666
+	.UnicodeString          = L"Quirkbot        " 
 	#else
 	.UnicodeString			= L"USB IO board    "
 	#endif
@@ -202,8 +202,8 @@ const USB_Descriptor_String_t ProductString =
 const USB_Descriptor_String_t ManufNameString = 
 {
 	.Header					= {.Size = USB_STRING_LEN(20), .Type = DTYPE_String},
-	#if DEVICE_VID == 0x1B4F
-	.UnicodeString			= L"SparkFun Electronics"
+	#if DEVICE_VID == 0xF055
+	.UnicodeString			= L"Quirkbot Labs       "
 	#else
 	.UnicodeString			= L"Unknown             "
 	#endif
