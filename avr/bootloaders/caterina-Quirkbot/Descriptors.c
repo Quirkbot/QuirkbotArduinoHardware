@@ -191,21 +191,19 @@ const USB_Descriptor_String_t LanguageString =
  */
 const USB_Descriptor_String_t ProductString =
 {
-	.Header                 = {.Size = USB_STRING_LEN(16), .Type = DTYPE_String},
-	#if DEVICE_PID == 0x0666
-	.UnicodeString          = L"Quirkbot        " 
-	#else
-	.UnicodeString			= L"USB IO board    "
-	#endif
+	.Header					= {.Size = USB_STRING_LEN(8), .Type = DTYPE_String},
+	.UnicodeString			= L"Quirkbot"
 };
 
 const USB_Descriptor_String_t ManufNameString = 
 {
-	.Header					= {.Size = USB_STRING_LEN(20), .Type = DTYPE_String},
-	#if DEVICE_VID == 0xF055
-	.UnicodeString			= L"Quirkbot Labs       "
+	#if DEVICE_VID == 0x2886
+	.Header					= {.Size = USB_STRING_LEN(11), .Type = DTYPE_String},
+	.UnicodeString			= L"Seeedstudio"
+	#elif DEVICE_VID == 0xF055
+	.UnicodeString			= L"Quirkbot   "
 	#else
-	.UnicodeString			= L"Unknown             "
+	.UnicodeString			= L"Unknown    "
 	#endif
 };
 
