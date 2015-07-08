@@ -1,8 +1,11 @@
 quirkbot.name=Quirkbot
+
 quirkbot.vid.0=0x2886
 quirkbot.pid.0=0xf004
+
 quirkbot.vid.1=0xf055
 quirkbot.pid.1=0x0001
+
 quirkbot.vid.2=0xf055
 quirkbot.pid.2=0x0666
 

@@ -197,8 +197,8 @@ const USB_Descriptor_String_t ProductString =
 
 const USB_Descriptor_String_t ManufNameString = 
 {
-	#if DEVICE_VID == 0x2886
 	.Header					= {.Size = USB_STRING_LEN(11), .Type = DTYPE_String},
+	#if DEVICE_VID == 0x2886
 	.UnicodeString			= L"Seeedstudio"
 	#elif DEVICE_VID == 0xF055
 	.UnicodeString			= L"Quirkbot   "

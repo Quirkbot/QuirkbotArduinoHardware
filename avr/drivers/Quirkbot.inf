@@ -87,10 +87,12 @@ ServiceBinary=%12%\%DRIVERFILENAME%.sys
 [SourceDisksNames]
 [DeviceList]
 %DESCRIPTION%=DriverInstall, USB\VID_F055&PID_0001
+%DESCRIPTION%=DriverInstall, USB\VID_F055&PID_0666
 
 
 [DeviceList.NTamd64]
 %DESCRIPTION%=DriverInstall, USB\VID_F055&PID_0001
+%DESCRIPTION%=DriverInstall, USB\VID_F055&PID_0666
 
 
 ;------------------------------------------------------------------------------
