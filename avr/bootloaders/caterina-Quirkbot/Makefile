@@ -55,7 +55,7 @@ VID = 0x2886
 # USB product ID (PID)
 # official Leonardo PID = 0x0036
 # SparkFun LilyPadUSB PID = 0x9207
-# Quirkbot PID = 0xf004
+# Quirkbot Bootloader PID = 0xf004
 PID = 0xf004
 
 # MCU name

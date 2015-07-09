@@ -3,11 +3,8 @@ quirkbot.name=Quirkbot
 quirkbot.vid.0=0x2886
 quirkbot.pid.0=0xf004
 
-quirkbot.vid.1=0xf055
-quirkbot.pid.1=0x0001
-
-quirkbot.vid.2=0xf055
-quirkbot.pid.2=0x0666
+quirkbot.vid.0=0x2886
+quirkbot.pid.0=0xf005
 
 quirkbot.upload.tool=avrdude
 quirkbot.upload.protocol=avr109
@@ -29,10 +26,11 @@ quirkbot.bootloader.lock_bits=0x2F
 quirkbot.build.mcu=atmega32u4
 quirkbot.build.f_cpu=8000000L
 quirkbot.build.vid=0x2886
-quirkbot.build.pid=0xf004
+quirkbot.build.pid=0xf005
 quirkbot.build.usb_product="Quirkbot"
 quirkbot.build.usb_manufacturer="Seeedstudio"
+quirkbot.build.usb_serialnumber="-Quirk-0"
 quirkbot.build.board=AVR_QUIRKBOT
 quirkbot.build.core=arduino
 quirkbot.build.variant=quirkbot
-quirkbot.build.extra_flags={build.usb_flags}
+quirkbot.build.extra_flags={build.usb_flags} -DUSB_SERIALNUMBER={build.usb_serialnumber}

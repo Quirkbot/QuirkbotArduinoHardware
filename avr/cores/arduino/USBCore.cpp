@@ -39,6 +39,7 @@ volatile u8 RxLEDPulse; /**< Milliseconds remaining for data Rx LED pulse */
 extern const u16 STRING_LANGUAGE[] PROGMEM;
 extern const u8 STRING_PRODUCT[] PROGMEM;
 extern const u8 STRING_MANUFACTURER[] PROGMEM;
+extern const u8 STRING_SERIALNUMBER[] PROGMEM;
 extern const DeviceDescriptor USB_DeviceDescriptor PROGMEM;
 extern const DeviceDescriptor USB_DeviceDescriptorA PROGMEM;
 
@@ -71,19 +72,27 @@ const u8 STRING_PRODUCT[] PROGMEM = USB_PRODUCT;
 
 const u8 STRING_MANUFACTURER[] PROGMEM = USB_MANUFACTURER;
 
+#ifndef USB_SERIALNUMBER
+#define USB_SERIALNUMBER "Unknown"
+#endif
+
+const u8 STRING_SERIALNUMBER[] PROGMEM = USB_SERIALNUMBER;
+
 
 #ifdef CDC_ENABLED
 #define DEVICE_CLASS 0x02
+#define DEVICE_SUB_CLASS 0x02
 #else
 #define DEVICE_CLASS 0x00
+#define DEVICE_SUB_CLASS 0x00
 #endif
 
 //	DEVICE DESCRIPTOR
 const DeviceDescriptor USB_DeviceDescriptor =
-	D_DEVICE(0x00,0x00,0x00,64,USB_VID,USB_PID,0x100,IMANUFACTURER,IPRODUCT,0,1);
+	D_DEVICE(DEVICE_CLASS,DEVICE_SUB_CLASS,0x00,64,USB_VID,USB_PID,0x100,IMANUFACTURER,IPRODUCT,ISERIALNUMBER,1);
 
 const DeviceDescriptor USB_DeviceDescriptorA =
-	D_DEVICE(DEVICE_CLASS,0x00,0x00,64,USB_VID,USB_PID,0x100,IMANUFACTURER,IPRODUCT,0,1);
+	D_DEVICE(DEVICE_CLASS,DEVICE_SUB_CLASS,0x00,64,USB_VID,USB_PID,0x100,IMANUFACTURER,IPRODUCT,ISERIALNUMBER,1);
 
 //==================================================================
 //==================================================================
@@ -509,6 +518,9 @@ bool SendDescriptor(Setup& setup)
 		}
 		else if (setup.wValueL == IMANUFACTURER) {
 			return USB_SendStringDescriptor(STRING_MANUFACTURER, strlen(USB_MANUFACTURER));
+		}
+		else if (setup.wValueL == ISERIALNUMBER) {
+			return USB_SendStringDescriptor(STRING_SERIALNUMBER, strlen(USB_SERIALNUMBER));
 		}
 		else
 			return false;
