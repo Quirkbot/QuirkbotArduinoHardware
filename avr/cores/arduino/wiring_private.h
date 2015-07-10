@@ -18,8 +18,6 @@
   Public License along with this library; if not, write to the
   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
   Boston, MA  02111-1307  USA
-
-  $Id: wiring.h 239 2007-01-12 17:58:39Z mellis $
 */
 
 #ifndef WiringPrivate_h
@@ -42,6 +40,8 @@ extern "C"{
 #ifndef sbi
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
+
+uint32_t countPulseASM(volatile uint8_t *port, uint8_t bit, uint8_t stateMask, unsigned long maxloops);
 
 #define EXTERNAL_INT_0 0
 #define EXTERNAL_INT_1 1

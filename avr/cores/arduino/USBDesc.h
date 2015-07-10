@@ -60,4 +60,5 @@
 
 #define IMANUFACTURER	1
 #define IPRODUCT		2
+#define ISERIALNUMBER	0
 
