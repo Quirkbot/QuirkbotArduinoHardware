@@ -222,26 +222,26 @@ const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
 	PC, // D5 - PC6
 	PD, // D6 - PD7
 	PE, // D7 - PE6
-	
+
 	PB, // D8 - PB4
 	PB,	// D9 - PB5
 	PB, // D10 - PB6
 	PB,	// D11 - PB7
 	PD, // D12 - PD6
 	PC, // D13 - PC7
-	
+
 	PB,	// D14 - MISO - PB3
 	PB,	// D15 - SCK - PB1
 	PB,	// D16 - MOSI - PB2
 	PB,	// D17 - SS - PB0
-	
+
 	PF,	// D18 - A0 - PF7
 	PF, // D19 - A1 - PF6
 	PF, // D20 - A2 - PF5
 	PF, // D21 - A3 - PF4
 	PF, // D22 - A4 - PF1
 	PF, // D23 - A5 - PF0
-	
+
 	PD, // D24 / D4 - A6 - PD4
 	PD, // D25 / D6 - A7 - PD7
 	PB, // D26 / D8 - A8 - PB4
@@ -259,26 +259,26 @@ const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
 	_BV(6), // D5 - PC6
 	_BV(7), // D6 - PD7
 	_BV(6), // D7 - PE6
-	
+
 	_BV(4), // D8 - PB4
 	_BV(5),	// D9 - PB5
 	_BV(6), // D10 - PB6
 	_BV(7),	// D11 - PB7
 	_BV(6), // D12 - PD6
 	_BV(7), // D13 - PC7
-	
+
 	_BV(3),	// D14 - MISO - PB3
 	_BV(1),	// D15 - SCK - PB1
 	_BV(2),	// D16 - MOSI - PB2
 	_BV(0),	// D17 - SS - PB0
-	
+
 	_BV(7),	// D18 - A0 - PF7
 	_BV(6), // D19 - A1 - PF6
 	_BV(5), // D20 - A2 - PF5
 	_BV(4), // D21 - A3 - PF4
 	_BV(1), // D22 - A4 - PF1
 	_BV(0), // D23 - A5 - PF0
-	
+
 	_BV(4), // D24 / D4 - A6 - PD4
 	_BV(7), // D25 / D6 - A7 - PD7
 	_BV(4), // D26 / D8 - A8 - PB4
@@ -288,24 +288,24 @@ const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
 };
 
 const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
-	NOT_ON_TIMER,	
+	NOT_ON_TIMER,
 	NOT_ON_TIMER,
 	NOT_ON_TIMER,
 	TIMER0B,		/* 3 */
 	NOT_ON_TIMER,
 	TIMER3A,		/* 5 */
 	TIMER4D,		/* 6 */
-	NOT_ON_TIMER,	
-	
-	NOT_ON_TIMER,	
+	NOT_ON_TIMER,
+
+	NOT_ON_TIMER,
 	TIMER1A,		/* 9 */
 	TIMER1B,		/* 10 */
 	TIMER0A,		/* 11 */
-	
-	NOT_ON_TIMER,	
+
+	NOT_ON_TIMER,
 	TIMER4A,		/* 13 */
-	
-	NOT_ON_TIMER,	
+
+	NOT_ON_TIMER,
 	NOT_ON_TIMER,
 	NOT_ON_TIMER,
 	NOT_ON_TIMER,
@@ -326,11 +326,11 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
 
 const uint8_t PROGMEM analog_pin_to_channel_PGM[] = {
 	7,	// A0				PF7					ADC7
-	6,	// A1				PF6					ADC6	
-	5,	// A2				PF5					ADC5	
+	6,	// A1				PF6					ADC6
+	5,	// A2				PF5					ADC5
 	4,	// A3				PF4					ADC4
-	1,	// A4				PF1					ADC1	
-	0,	// A5				PF0					ADC0	
+	1,	// A4				PF1					ADC1
+	0,	// A5				PF0					ADC0
 	8,	// A6		D4		PD4					ADC8
 	10,	// A7		D6		PD7					ADC10
 	11,	// A8		D8		PB4					ADC11
@@ -367,62 +367,4 @@ const uint8_t PROGMEM analog_pin_to_channel_PGM[] = {
 // #############################################################################
 // #############################################################################
 
-
-// BOARD LOCATIONS -------------------------------------------------------------
-
-// No Location 
-#define NO_LOCATION	0
-
-// Built in LEDs
-#define LM	106	// Left Mouth		(PD5) 
-#define RM	107	// Right Mouth		(PB0) 
-							
-#define LE	8	// Left Eye		 	(PB4)	ADC11
-#define RE	A5	// Right Eye		(PF0)	ADC0
-							
-// Limbs
-#define LL	100	// Left Leg
-#define RL	101	// Right Leg
-#define RA	102	// Right Arm
-#define H	103	// Horn
-#define LA	105	// Left Arm
-							
-#define LLF	9	// Left Leg Front	(PB5)	ADC12	PWM (16BIT)
-#define RLF	11	// Right Leg Front	(PB7)			PWM (8/16BIT)
-#define RAF	5	// Right Arm Front	(PC6)			PWM (HS)
-#define HF	13	// Horn Front		(PC7)			PWM (10BIT)
-#define LAF	10	// Left Arm Front	(PB6)	ADC13	PWM (16BIT)
-						
-#define LLB	A0	// Left Leg Back	(PF7)	ADC7
-#define RLB	A4	// Right Leg Back	(PF1)	ADC1
-#define RAB	A3	// Right Arm Back	(PF4)	ADC4
-#define HB	A2	// Horn Back		(PF5)	ADC5
-#define LAB	A1	// Left Arm Back	(PF6)	ADC6
-
-// Backpack
-#define BP1	6	// Back Pack 1		(PD7)	ADC10	PWM (HS)	Uppmost left
-#define BP2	12	// Back Pack 2		(PD6)	ADC9
-#define BP3	0	// Back Pack 3		(PD2)	RXD1
-#define BP4	2	// Back Pack 4		(PD1)	SDA
-#define BP5	3	// Back Pack 5		(PD0)	SCL
-#define BP6	1 	// Back Pack 6		(PD3)	TXD1
-
-// Pull up pin
-#define PULL_UP_PIN 4
-
-// UUID
-#define QB_UUID_SIZE 16
-
-
-// RX and TX -------------------------------------------------------------------
-// Keep off when doing serial communication
-#undef TXLED0
-#undef TXLED1
-#undef RXLED0
-#undef RXLED1
-#undef TX_RX_LED_INIT
-#define TXLED0		PORTD &= ~(1<<5)
-#define TXLED1		PORTD &= ~(1<<5)
-#define RXLED0		PORTB &= ~(1<<0)
-#define RXLED1		PORTB &= ~(1<<0)
-#define TX_RX_LED_INIT	DDRD |= (1<<5), DDRB |= (1<<0), TXLED0, RXLED0
+#include "QuirkbotBoard.h"
