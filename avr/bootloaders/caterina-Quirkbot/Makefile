@@ -1,6 +1,6 @@
 # Hey Emacs, this is a -*- makefile -*-
 #----------------------------------------------------------------------------
-# WinAVR Makefile Template written by Eric B. Weddington, Jörg Wunsch, et al.
+# WinAVR Makefile Template written by Eric B. Weddington, Jï¿½rg Wunsch, et al.
 #  >> Modified for use with the LUFA project. <<
 #
 # Released to the Public Domain
@@ -56,7 +56,7 @@ VID = 0x2886
 # official Leonardo PID = 0x0036
 # SparkFun LilyPadUSB PID = 0x9207
 # Quirkbot Bootloader PID = 0xf004
-PID = 0xf004
+PID = 0xf005
 
 # MCU name
 MCU = atmega32u4
@@ -371,8 +371,8 @@ AVRDUDE_PORT = usb
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 #AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
-AVRDUDE_WRITE_FUSES = -U efuse:w:0xce:m 
-AVRDUDE_WRITE_FUSES += -U hfuse:w:0xd8:m 
+AVRDUDE_WRITE_FUSES = -U efuse:w:0xce:m
+AVRDUDE_WRITE_FUSES += -U hfuse:w:0xd8:m
 AVRDUDE_WRITE_FUSES += -U lfuse:w:0xff:m
 
 
@@ -700,7 +700,7 @@ checksource:
 			echo "Found Source File: $$f" ; \
 		else \
 			echo "Source File Not Found: $$f" ; \
-		fi; done 
+		fi; done
 
 
 # Create object files directory
@@ -715,4 +715,3 @@ $(shell mkdir $(OBJDIR) 2>/dev/null)
 .PHONY : all begin finish end sizebefore sizeafter gccversion \
 build elf hex eep lss sym coff extcoff doxygen clean          \
 clean_list clean_doxygen program debug gdb-config checksource
-
