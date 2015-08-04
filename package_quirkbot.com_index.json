@@ -12,12 +12,12 @@
 				{
 					"name": "Quirkbot AVR Boards",
 					"architecture": "avr",
-					"version": "0.0.4",
+					"version": "0.0.5",
 					"category": "Contributed",
 					"url": "https://github.com/Quirkbot/QuirkbotArduinoHardware/raw/master/quirkbot-avr.tar.bz2",
 					"archiveFileName": "quirkbot-avr.tar.bz2",
-					"checksum": "SHA-256:dfa1130cebeefa6be8f77d3558a1713ed0582639a004bccc3196c5d6600a2ed8",
-					"size": "217413",
+					"checksum": "SHA-256:cb067c45526d734627b0f13628092ded510e8d956c544f16c9527fbb74a0fcd1",
+					"size": "217936",
 					"help": {
 						"online": "https://github.com/Quirkbot/QuirkbotArduinoHardware/issues"
 					},
