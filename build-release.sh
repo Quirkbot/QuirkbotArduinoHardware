@@ -1,3 +1,10 @@
+rm QuirkbotArduinoHardware.zip
+zip -vr QuirkbotArduinoHardware.zip \
+avr \
+-x "*.DS_Store"
+
+clear
+
 cp -r avr quirkbot-avr
 rm -r quirkbot-avr/bootloaders/caterina-Quirkbot/LUFA-111009
 rm -r quirkbot-avr.tar.bz2
