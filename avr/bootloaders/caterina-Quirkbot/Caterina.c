@@ -1,9 +1,9 @@
 /*
-             LUFA Library
-     Copyright (C) Dean Camera, 2011.
+			 LUFA Library
+	 Copyright (C) Dean Camera, 2011.
 
   dean [at] fourwalledcubicle [dot] com
-           www.lufa-lib.org
+		   www.lufa-lib.org
 */
 
 /*
@@ -40,9 +40,9 @@
  *  operating systems will not open the port unless the settings can be set successfully.
  */
 static CDC_LineEncoding_t LineEncoding = { .BaudRateBPS = 0,
-                                           .CharFormat  = CDC_LINEENCODING_OneStopBit,
-                                           .ParityType  = CDC_PARITY_None,
-                                           .DataBits    = 8                            };
+										   .CharFormat  = CDC_LINEENCODING_OneStopBit,
+										   .ParityType  = CDC_PARITY_None,
+										   .DataBits	= 8							};
 
 /** Current address counter. This stores the current address of the FLASH or EEPROM as set by the host,
  *  and is used when reading or writing to the AVRs memory (either FLASH or EEPROM depending on the issued
@@ -62,7 +62,7 @@ uint16_t TxLEDPulse = 0; // time remaining for Tx LED pulse
 uint16_t RxLEDPulse = 0; // time remaining for Rx LED pulse
 
 /* Bootloader timeout timer */
-#define TIMEOUT_PERIOD	20000
+#define TIMEOUT_PERIOD	8000
 uint16_t Timeout = 0;
 
 uint16_t bootKey = 0x7777;
@@ -82,7 +82,7 @@ void StartSketch(void)
 	MCUCR = (1 << IVCE);
 	MCUCR = 0;
 
-	L_LED_OFF();
+	//L_LED_OFF();
 	TX_LED_OFF();
 	RX_LED_OFF();
 
@@ -95,14 +95,21 @@ uint16_t LLEDPulse;
 void LEDPulse(void)
 {
 	LLEDPulse++;
-	uint8_t p = LLEDPulse >> 8;
+	uint8_t p = LLEDPulse >> 7;
 	if (p > 127)
 		p = 254-p;
 	p += p;
-	if (((uint8_t)LLEDPulse) > p)
-		L_LED_OFF();
-	else
-		L_LED_ON();
+	if (((uint8_t)LLEDPulse) > p){
+		//L_LED_OFF();
+		TX_LED_OFF();
+		RX_LED_ON();
+	}
+
+	else{
+		//L_LED_ON();
+		TX_LED_ON();
+		RX_LED_OFF();
+	}
 }
 
 /** Main program entry point. This routine configures the hardware required by the bootloader, then continuously
@@ -174,7 +181,7 @@ void SetupHardware(void)
 
 	LED_SETUP();
 	CPU_PRESCALE(0);
-	L_LED_OFF();
+	//L_LED_OFF();
 	TX_LED_OFF();
 	RX_LED_OFF();
 
@@ -217,16 +224,16 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 {
 	/* Setup CDC Notification, Rx and Tx Endpoints */
 	Endpoint_ConfigureEndpoint(CDC_NOTIFICATION_EPNUM, EP_TYPE_INTERRUPT,
-	                           ENDPOINT_DIR_IN, CDC_NOTIFICATION_EPSIZE,
-	                           ENDPOINT_BANK_SINGLE);
+							   ENDPOINT_DIR_IN, CDC_NOTIFICATION_EPSIZE,
+							   ENDPOINT_BANK_SINGLE);
 
 	Endpoint_ConfigureEndpoint(CDC_TX_EPNUM, EP_TYPE_BULK,
-	                           ENDPOINT_DIR_IN, CDC_TXRX_EPSIZE,
-	                           ENDPOINT_BANK_SINGLE);
+							   ENDPOINT_DIR_IN, CDC_TXRX_EPSIZE,
+							   ENDPOINT_BANK_SINGLE);
 
 	Endpoint_ConfigureEndpoint(CDC_RX_EPNUM, EP_TYPE_BULK,
-	                           ENDPOINT_DIR_OUT, CDC_TXRX_EPSIZE,
-	                           ENDPOINT_BANK_SINGLE);
+							   ENDPOINT_DIR_OUT, CDC_TXRX_EPSIZE,
+							   ENDPOINT_BANK_SINGLE);
 }
 
 /** Event handler for the USB_ControlRequest event. This is used to catch and process control requests sent to
@@ -237,7 +244,7 @@ void EVENT_USB_Device_ControlRequest(void)
 {
 	/* Ignore any requests that aren't directed to the CDC interface */
 	if ((USB_ControlRequest.bmRequestType & (CONTROL_REQTYPE_TYPE | CONTROL_REQTYPE_RECIPIENT)) !=
-	    (REQTYPE_CLASS | REQREC_INTERFACE))
+		(REQTYPE_CLASS | REQREC_INTERFACE))
 	{
 		return;
 	}
@@ -279,9 +286,9 @@ void EVENT_USB_Device_ControlRequest(void)
 static void ReadWriteMemoryBlock(const uint8_t Command)
 {
 	uint16_t BlockSize;
-	char     MemoryType;
+	char	 MemoryType;
 
-	bool     HighByte = false;
+	bool	 HighByte = false;
 	uint8_t  LowByte  = 0;
 
 	BlockSize  = (FetchNextCommandByte() << 8);
@@ -448,19 +455,19 @@ static void WriteNextResponseByte(const uint8_t Response)
 	TxLEDPulse = TX_RX_LED_PULSE_PERIOD;
 }
 
-#define STK_OK              0x10
-#define STK_INSYNC          0x14  // ' '
-#define CRC_EOP             0x20  // 'SPACE'
-#define STK_GET_SYNC        0x30  // '0'
+#define STK_OK			  0x10
+#define STK_INSYNC		  0x14  // ' '
+#define CRC_EOP			 0x20  // 'SPACE'
+#define STK_GET_SYNC		0x30  // '0'
 
 #define STK_GET_PARAMETER   0x41  // 'A'
-#define STK_SET_DEVICE      0x42  // 'B'
+#define STK_SET_DEVICE	  0x42  // 'B'
 #define STK_SET_DEVICE_EXT  0x45  // 'E'
-#define STK_LOAD_ADDRESS    0x55  // 'U'
-#define STK_UNIVERSAL       0x56  // 'V'
-#define STK_PROG_PAGE       0x64  // 'd'
-#define STK_READ_PAGE       0x74  // 't'
-#define STK_READ_SIGN       0x75  // 'u'
+#define STK_LOAD_ADDRESS	0x55  // 'U'
+#define STK_UNIVERSAL	   0x56  // 'V'
+#define STK_PROG_PAGE	   0x64  // 'd'
+#define STK_READ_PAGE	   0x74  // 't'
+#define STK_READ_SIGN	   0x75  // 'u'
 
 /** Task to read in AVR910 commands from the CDC data OUT endpoint, process them, perform the required actions
  *  and send the appropriate response back to the host.

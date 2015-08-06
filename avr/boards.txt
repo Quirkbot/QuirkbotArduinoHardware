@@ -1,7 +1,12 @@
 quirkbot.name=Quirkbot
-
 quirkbot.vid.0=0x2886
-quirkbot.pid.0=0xf005
+quirkbot.pid.0=0xf004
+quirkbot.vid.1=0x2886
+quirkbot.pid.1=0xf005
+quirkbot.vid.2=0x2886
+quirkbot.pid.2=0xf006
+quirkbot.vid.3=0x2886
+quirkbot.pid.3=0xf007
 
 quirkbot.upload.tool=avrdude
 quirkbot.upload.protocol=avr109
@@ -16,7 +21,7 @@ quirkbot.bootloader.tool=avrdude
 quirkbot.bootloader.low_fuses=0xff
 quirkbot.bootloader.high_fuses=0xd8
 quirkbot.bootloader.extended_fuses=0xce
-quirkbot.bootloader.file=caterina-quirkbot/Caterina-Quirkbot.hex
+quirkbot.bootloader.file=caterina-Quirkbot/Caterina-Quirkbot.hex
 quirkbot.bootloader.unlock_bits=0x3F
 quirkbot.bootloader.lock_bits=0x2F
 
@@ -25,9 +30,8 @@ quirkbot.build.f_cpu=8000000L
 quirkbot.build.vid=0x2886
 quirkbot.build.pid=0xf005
 quirkbot.build.usb_product="Quirkbot"
-quirkbot.build.usb_manufacturer="Seeedstudio"
-quirkbot.build.usb_serialnumber="-Quirk-0"
+quirkbot.build.usb_manufacturer="Quirkbot (quirkbot.com)"
 quirkbot.build.board=AVR_QUIRKBOT
 quirkbot.build.core=arduino
 quirkbot.build.variant=quirkbot
-quirkbot.build.extra_flags={build.usb_flags} -DUSB_SERIALNUMBER={build.usb_serialnumber}
+quirkbot.build.extra_flags={build.usb_flags}
