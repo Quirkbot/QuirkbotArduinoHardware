@@ -13,9 +13,12 @@ rm -r quirkbot-avr.tar.bz2
 tar -jcf quirkbot-avr.tar.bz2 QuirkbotArduinoHardware/avr
 
 rm QuirkbotArduinoHardware.zip
+cd QuirkbotArduinoHardware
 zip -vr QuirkbotArduinoHardware.zip \
-QuirkbotArduinoHardware/avr \
+avr \
 -x "*.DS_Store"
+cd ..
+mv QuirkbotArduinoHardware/QuirkbotArduinoHardware.zip QuirkbotArduinoHardware.zip
 
 rm -r QuirkbotArduinoHardware
 
