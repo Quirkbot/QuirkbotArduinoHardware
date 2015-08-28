@@ -195,16 +195,10 @@ const USB_Descriptor_String_t ProductString =
 	.UnicodeString			= L"Quirkbot"
 };
 
-const USB_Descriptor_String_t ManufNameString = 
+const USB_Descriptor_String_t ManufNameString =
 {
-	.Header					= {.Size = USB_STRING_LEN(11), .Type = DTYPE_String},
-	#if DEVICE_VID == 0x2886
-	.UnicodeString			= L"Seeedstudio"
-	#elif DEVICE_VID == 0xF055
-	.UnicodeString			= L"Quirkbot   "
-	#else
-	.UnicodeString			= L"Unknown    "
-	#endif
+	.Header					= {.Size = USB_STRING_LEN(23), .Type = DTYPE_String},
+	.UnicodeString			= L"Quirkbot (quirkbot.com)"
 };
 
 /** This function is called by the library when in device mode, and must be overridden (see LUFA library "USB Descriptors"
@@ -239,7 +233,7 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 				Address = &LanguageString;
 				Size    = LanguageString.Header.Size;
 			}
-			else if (DescriptorNumber == DeviceDescriptor.ProductStrIndex) 
+			else if (DescriptorNumber == DeviceDescriptor.ProductStrIndex)
 			{
 				Address = &ProductString;
 				Size    = ProductString.Header.Size;
@@ -255,4 +249,3 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 	*DescriptorAddress = Address;
 	return Size;
 }
-
