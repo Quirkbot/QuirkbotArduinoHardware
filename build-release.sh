@@ -9,8 +9,8 @@ rm -r QuirkbotArduinoHardware/avr/bootloaders/caterina-Quirkbot/*
 
 mv __Caterina-Quirkbot.hex QuirkbotArduinoHardware/avr/bootloaders/caterina-Quirkbot/Caterina-Quirkbot.hex
 
-rm -r quirkbot-avr.tar.bz2
-tar -jcf quirkbot-avr.tar.bz2 QuirkbotArduinoHardware/avr
+#rm -r quirkbot-avr.tar.bz2
+#tar -jcf quirkbot-avr.tar.bz2 QuirkbotArduinoHardware/avr
 
 rm QuirkbotArduinoHardware.zip
 cd QuirkbotArduinoHardware
@@ -28,8 +28,8 @@ clear
 echo
 echo
 echo 'SIZE'
-stat -f%z quirkbot-avr.tar.bz2
+stat -f%z QuirkbotArduinoHardware.zip
 echo
 echo
 echo 'CHECKSHUM'
-shasum -a 256 quirkbot-avr.tar.bz2
+shasum -a 256 QuirkbotArduinoHardware.zip
