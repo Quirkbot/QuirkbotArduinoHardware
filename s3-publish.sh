@@ -1,5 +1,3 @@
-sh "build-release.sh"
-
 rm -r s3_publish
 mkdir s3_publish
 
