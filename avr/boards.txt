@@ -32,6 +32,6 @@ quirkbot.build.pid=0xf005
 quirkbot.build.usb_product="Quirkbot"
 quirkbot.build.usb_manufacturer="Quirkbot (quirkbot.com)"
 quirkbot.build.board=AVR_QUIRKBOT
-quirkbot.build.core=arduino
+quirkbot.build.core=arduino:arduino
 quirkbot.build.variant=quirkbot
 quirkbot.build.extra_flags={build.usb_flags}

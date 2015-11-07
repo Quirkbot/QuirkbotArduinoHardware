@@ -12,7 +12,7 @@
 				{
 					"name": "Quirkbot AVR Boards",
 					"architecture": "avr",
-					"version": "0.2.0",
+					"version": "0.3.0",
 					"category": "Contributed",
 					"url": "http://code.quirkbot.com/downloads/quirkbot-arduino-hardware.zip",
 					"archiveFileName": "quirkbot-arduino-hardware.zip",
