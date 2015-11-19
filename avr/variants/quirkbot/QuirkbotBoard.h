@@ -57,9 +57,9 @@
 #undef TXLED1
 #undef RXLED0
 #undef RXLED1
-#define TXLED0		PORTD &= ~(1<<5)
-#define TXLED1		PORTD &= ~(1<<5)
-#define RXLED0		PORTB &= ~(1<<0)
-#define RXLED1		PORTD &= ~(1<<0)
+#define TXLED0
+#define TXLED1
+#define RXLED0
+#define RXLED1
 
 #endif
