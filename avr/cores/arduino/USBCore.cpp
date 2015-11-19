@@ -1,23 +1,24 @@
 
 
-/* Copyright (c) 2010, Peter Barrett  
-**  
-** Permission to use, copy, modify, and/or distribute this software for  
-** any purpose with or without fee is hereby granted, provided that the  
-** above copyright notice and this permission notice appear in all copies.  
-** 
-** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL  
-** WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED  
-** WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR  
-** BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES  
-** OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,  
-** WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,  
-** ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS  
-** SOFTWARE.  
+/* Copyright (c) 2010, Peter Barrett
+**
+** Permission to use, copy, modify, and/or distribute this software for
+** any purpose with or without fee is hereby granted, provided that the
+** above copyright notice and this permission notice appear in all copies.
+**
+** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+** WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+** WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR
+** BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES
+** OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+** WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+** ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+** SOFTWARE.
 */
 
 #include "USBAPI.h"
 #include "PluggableUSB.h"
+#include <stdlib.h>
 
 #if defined(USBCON)
 
@@ -69,10 +70,10 @@ const u8 STRING_MANUFACTURER[] PROGMEM = USB_MANUFACTURER;
 
 //	DEVICE DESCRIPTOR
 const DeviceDescriptor USB_DeviceDescriptor =
-	D_DEVICE(0x00,0x00,0x00,64,USB_VID,USB_PID,0x100,IMANUFACTURER,IPRODUCT,0,1);
+	D_DEVICE(0x02,0x02,0x01,64,USB_VID,USB_PID,0x100,IMANUFACTURER,IPRODUCT,0,1);
 
 const DeviceDescriptor USB_DeviceDescriptorB =
-	D_DEVICE(0xEF,0x02,0x01,64,USB_VID,USB_PID,0x100,IMANUFACTURER,IPRODUCT,0,1);
+	D_DEVICE(0x02,0x02,0x01,64,USB_VID,USB_PID,0x100,IMANUFACTURER,IPRODUCT,0,1);
 
 //==================================================================
 //==================================================================
@@ -114,9 +115,9 @@ static inline void Recv(volatile u8* data, u8 count)
 {
 	while (count--)
 		*data++ = UEDATX;
-	
+
 	RXLED1;					// light the RX LED
-	RxLEDPulse = TX_RX_LED_PULSE_MS;	
+	RxLEDPulse = TX_RX_LED_PULSE_MS;
 }
 
 static inline u8 Recv8()
@@ -124,7 +125,7 @@ static inline u8 Recv8()
 	RXLED1;					// light the RX LED
 	RxLEDPulse = TX_RX_LED_PULSE_MS;
 
-	return UEDATX;	
+	return UEDATX;
 }
 
 static inline void Send8(u8 d)
@@ -224,7 +225,7 @@ int USB_Recv(u8 ep, void* d, int len)
 {
 	if (!_usbConfiguration || len < 0)
 		return -1;
-	
+
 	LockEP lock(ep);
 	u8 n = FifoByteCount();
 	len = min(n,len);
@@ -234,7 +235,7 @@ int USB_Recv(u8 ep, void* d, int len)
 		*dst++ = Recv8();
 	if (len && !FifoByteCount())	// release empty buffer
 		ReleaseRX();
-	
+
 	return len;
 }
 
@@ -308,20 +309,15 @@ int USB_Send(u8 ep, const void* d, int len)
 	return r;
 }
 
-u8 _initEndpoints[] =
+u8 _initEndpoints[USB_ENDPOINTS] =
 {
-	0,
-	
-	EP_TYPE_INTERRUPT_IN,		// CDC_ENDPOINT_ACM
-	EP_TYPE_BULK_OUT,			// CDC_ENDPOINT_OUT
-	EP_TYPE_BULK_IN,			// CDC_ENDPOINT_IN
+	0,                      // Control Endpoint
 
-#ifdef PLUGGABLE_USB_ENABLED
-	//allocate 3 endpoints and remove const so they can be changed by the user
-	0,
-	0,
-	0,
-#endif
+	EP_TYPE_INTERRUPT_IN,   // CDC_ENDPOINT_ACM
+	EP_TYPE_BULK_OUT,       // CDC_ENDPOINT_OUT
+	EP_TYPE_BULK_IN,        // CDC_ENDPOINT_IN
+
+	// Following endpoints are automatically initialized to 0
 };
 
 #define EP_SINGLE_64 0x32	// EP0
@@ -367,13 +363,13 @@ bool ClassInterfaceRequest(USBSetup& setup)
 		return CDC_Setup(setup);
 
 #ifdef PLUGGABLE_USB_ENABLED
-	return PUSB_Setup(setup, i);
+	return PluggableUSB().setup(setup);
 #endif
 	return false;
 }
 
-int _cmark;
-int _cend;
+static int _cmark;
+static int _cend;
 void InitControl(int end)
 {
 	SetEP(0);
@@ -414,11 +410,12 @@ int USB_SendControl(u8 flags, const void* d, int len)
 // Send a USB descriptor string. The string is stored in PROGMEM as a
 // plain ASCII string but is sent out as UTF-16 with the correct 2-byte
 // prefix
-static bool USB_SendStringDescriptor(const u8*string_P, u8 string_len) {
+static bool USB_SendStringDescriptor(const u8*string_P, u8 string_len, uint8_t flags) {
         SendControl(2 + string_len * 2);
         SendControl(3);
+        bool pgm = flags & TRANSFER_PGM;
         for(u8 i = 0; i < string_len; i++) {
-                bool r = SendControl(pgm_read_byte(&string_P[i]));
+                bool r = SendControl(pgm ? pgm_read_byte(&string_P[i]) : string_P[i]);
                 r &= SendControl(0); // high byte
                 if(!r) {
                         return false;
@@ -438,14 +435,14 @@ int USB_RecvControl(void* d, int len)
 	return len;
 }
 
-int SendInterfaces()
+static u8 SendInterfaces()
 {
 	u8 interfaces = 0;
 
 	CDC_GetInterface(&interfaces);
 
 #ifdef PLUGGABLE_USB_ENABLED
-	PUSB_GetInterface(&interfaces);
+	PluggableUSB().getInterface(&interfaces);
 #endif
 
 	return interfaces;
@@ -458,8 +455,8 @@ static
 bool SendConfiguration(int maxlen)
 {
 	//	Count and measure interfaces
-	InitControl(0);	
-	int interfaces = SendInterfaces();
+	InitControl(0);
+	u8 interfaces = SendInterfaces();
 	ConfigDescriptor config = D_CONFIG(_cmark + sizeof(ConfigDescriptor),interfaces);
 
 	//	Now send them
@@ -469,7 +466,7 @@ bool SendConfiguration(int maxlen)
 	return true;
 }
 
-u8 _cdcComposite = 0;
+static u8 _cdcComposite = 0;
 
 static
 bool SendDescriptor(USBSetup& setup)
@@ -481,7 +478,7 @@ bool SendDescriptor(USBSetup& setup)
 
 	InitControl(setup.wLength);
 #ifdef PLUGGABLE_USB_ENABLED
-	ret = PUSB_GetDescriptor(t);
+	ret = PluggableUSB().getDescriptor(setup);
 	if (ret != 0) {
 		return (ret > 0 ? true : false);
 	}
@@ -500,10 +497,17 @@ bool SendDescriptor(USBSetup& setup)
 			desc_addr = (const u8*)&STRING_LANGUAGE;
 		}
 		else if (setup.wValueL == IPRODUCT) {
-			return USB_SendStringDescriptor(STRING_PRODUCT, strlen(USB_PRODUCT));
+			return USB_SendStringDescriptor(STRING_PRODUCT, strlen(USB_PRODUCT), TRANSFER_PGM);
 		}
 		else if (setup.wValueL == IMANUFACTURER) {
-			return USB_SendStringDescriptor(STRING_MANUFACTURER, strlen(USB_MANUFACTURER));
+			return USB_SendStringDescriptor(STRING_MANUFACTURER, strlen(USB_MANUFACTURER), TRANSFER_PGM);
+		}
+		else if (setup.wValueL == ISERIAL) {
+#ifdef PLUGGABLE_USB_ENABLED
+			char name[ISERIAL_MAX_LEN];
+			PluggableUSB().getShortName(name);
+			return USB_SendStringDescriptor((uint8_t*)name, strlen(name), 0);
+#endif
 		}
 		else
 			return false;
@@ -729,7 +733,7 @@ ISR(USB_GEN_vect)
 	if (udint & (1<<SOFI))
 	{
 		USB_Flush(CDC_TX);				// Send a tx frame if found
-		
+
 		// check whether the one-shot period has elapsed.  if so, turn off the LED
 		if (TxLEDPulse && !(--TxLEDPulse))
 			TXLED0;
@@ -789,7 +793,7 @@ void USBDevice_::attach()
 
 	UDINT &= ~((1<<WAKEUPI) | (1<<SUSPI)); // clear already pending WAKEUP / SUSPEND requests
 	UDIEN = (1<<EORSTE) | (1<<SOFE) | (1<<SUSPE);	// Enable interrupts for EOR (End of Reset), SOF (start of frame) and SUSPEND
-	
+
 	TX_RX_LED_INIT;
 }
 
