@@ -53,10 +53,12 @@
 
 // RX and TX -------------------------------------------------------------------
 // Keep them off when doing serial communication
+#undef TX_RX_LED_INIT
 #undef TXLED0
 #undef TXLED1
 #undef RXLED0
 #undef RXLED1
+#define TX_RX_LED_INIT
 #define TXLED0
 #define TXLED1
 #define RXLED0
