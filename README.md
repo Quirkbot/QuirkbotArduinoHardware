@@ -34,7 +34,7 @@ Build release files for integrating with Arduino's boards index and for manual d
 - Copied from *Arduino AVR Boards*.
 - Check what is the latest version at the [package index](http://downloads.arduino.cc/packages/package_index.json).
 
-Must be patched to change the USB descriptors. Currently this means changing lines `73` and `76` to:
+Must be patched to change the USB descriptors. Currently this means changing `/avr/cores/arduino/USBCore.cpp` lines `73` and `76` to:
 ```
 D_DEVICE(0x02,0x02,0x01,64,USB_VID,USB_PID,0x100,IMANUFACTURER,IPRODUCT,0,1);
 ```
