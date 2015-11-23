@@ -1,26 +1,23 @@
-rm -r QuirkbotArduinoHardware
-mkdir QuirkbotArduinoHardware
+rm -r quirkbot-arduino-hardware
+mkdir quirkbot-arduino-hardware
 
-cp -r avr QuirkbotArduinoHardware/avr
+cp -r avr quirkbot-arduino-hardware/avr
 
-cp QuirkbotArduinoHardware/avr/bootloaders/caterina-Quirkbot/Caterina-Quirkbot.hex __Caterina-Quirkbot.hex
+cp quirkbot-arduino-hardware/avr/bootloaders/caterina-Quirkbot/Caterina-Quirkbot.hex __Caterina-Quirkbot.hex
 
-rm -r QuirkbotArduinoHardware/avr/bootloaders/caterina-Quirkbot/*
+rm -r quirkbot-arduino-hardware/avr/bootloaders/caterina-Quirkbot/*
 
-mv __Caterina-Quirkbot.hex QuirkbotArduinoHardware/avr/bootloaders/caterina-Quirkbot/Caterina-Quirkbot.hex
+mv __Caterina-Quirkbot.hex quirkbot-arduino-hardware/avr/bootloaders/caterina-Quirkbot/Caterina-Quirkbot.hex
 
-#rm -r quirkbot-avr.tar.bz2
-#tar -jcf quirkbot-avr.tar.bz2 QuirkbotArduinoHardware/avr
-
-rm QuirkbotArduinoHardware.zip
-cd QuirkbotArduinoHardware
-zip -vr QuirkbotArduinoHardware.zip \
+rm quirkbot-arduino-hardware.zip
+cd quirkbot-arduino-hardware
+zip -vr quirkbot-arduino-hardware.zip \
 avr \
 -x "*.DS_Store"
 cd ..
-mv QuirkbotArduinoHardware/QuirkbotArduinoHardware.zip QuirkbotArduinoHardware.zip
+mv quirkbot-arduino-hardware/quirkbot-arduino-hardware.zip quirkbot-arduino-hardware.zip
 
-rm -r QuirkbotArduinoHardware
+rm -r quirkbot-arduino-hardware
 
 clear
 
@@ -28,8 +25,8 @@ clear
 echo
 echo
 echo 'SIZE'
-stat -f%z QuirkbotArduinoHardware.zip
+stat -f%z quirkbot-arduino-hardware.zip
 echo
 echo
 echo 'CHECKSHUM'
-shasum -a 256 QuirkbotArduinoHardware.zip
+shasum -a 256 quirkbot-arduino-hardware.zip
