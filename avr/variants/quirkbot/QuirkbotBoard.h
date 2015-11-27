@@ -35,8 +35,8 @@
 #define LAB	A1	// Left Arm Back	(PF6)	ADC6
 
 // Backpack
-#define BP1	6	// Back Pack 1		(PD7)	ADC10	PWM (HS)	Uppmost left
-#define BP2	12	// Back Pack 2		(PD6)	ADC9
+#define BP1	A7	// Back Pack 1		(PD7)	ADC10	PWM (HS)	Uppmost left
+#define BP2	A11	// Back Pack 2		(PD6)	ADC9
 #define BP3	0	// Back Pack 3		(PD2)	RXD1
 #define BP4	2	// Back Pack 4		(PD1)	SDA
 #define BP5	3	// Back Pack 5		(PD0)	SCL
