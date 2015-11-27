@@ -16,8 +16,8 @@
 					"category": "Contributed",
 					"url": "http://code.quirkbot.com/downloads/quirkbot-arduino-hardware.zip",
 					"archiveFileName": "quirkbot-arduino-hardware.zip",
-					"checksum": "SHA-256:46a31fcaf59760c12c4fbd0cfd464f3ff8d0fcdd952bcac406c8032d341374c7",
-					"size": "131578",
+					"checksum": "SHA-256:6702663fee34e14a207ed3fae39421e074eaf8fc5f350826c70c27a140224437",
+					"size": "131580",
 					"help": {
 						"online": "https://github.com/Quirkbot/QuirkbotArduinoHardware/issues"
 					},
