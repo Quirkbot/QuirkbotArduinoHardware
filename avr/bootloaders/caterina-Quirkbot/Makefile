@@ -122,7 +122,7 @@ OBJDIR = .
 
 
 # Path to the LUFA library
-LUFA_PATH = LUFA-111009
+LUFA_PATH = LUFA
 
 
 # LUFA library compile-time options and predefined tokens
