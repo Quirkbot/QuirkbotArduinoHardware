@@ -1,4 +1,4 @@
+cd Bootloader
 make clean
 make
-rm Caterina-Quirkbot.hex
-mv Caterina.hex Caterina-Quirkbot.hex
+mv BootloaderCDC.hex ../Caterina-Quirkbot.hex
