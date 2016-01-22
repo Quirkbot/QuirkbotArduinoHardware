@@ -410,9 +410,6 @@ static void WriteNextResponseByte(const uint8_t Response)
  */
 static void CDC_Task(void)
 {
-	/* Toggle LEDs for feedback */
-	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
-
 	/* Select the OUT endpoint */
 	Endpoint_SelectEndpoint(CDC_RX_EPADDR);
 
@@ -430,14 +427,14 @@ static void CDC_Task(void)
 		/* Send confirmation byte back to the host */
 		WriteNextResponseByte('\r');
 	}
-	else if ((Command == AVR109_COMMAND_SetLED) || (Command == AVR109_COMMAND_ClearLED) ||
-			 (Command == AVR109_COMMAND_SelectDeviceType))
-	{
-		FetchNextCommandByte();
-
-		/* Send confirmation byte back to the host */
-		WriteNextResponseByte('\r');
-	}
+	//else if ((Command == AVR109_COMMAND_SetLED) || (Command == AVR109_COMMAND_ClearLED) ||
+	//		 (Command == AVR109_COMMAND_SelectDeviceType))
+	//{
+	//	FetchNextCommandByte();
+	//
+	//	/* Send confirmation byte back to the host */
+	//	WriteNextResponseByte('\r');
+	//}
 	else if ((Command == AVR109_COMMAND_EnterProgrammingMode) || (Command == AVR109_COMMAND_LeaveProgrammingMode))
 	{
 		/* Send confirmation byte back to the host */

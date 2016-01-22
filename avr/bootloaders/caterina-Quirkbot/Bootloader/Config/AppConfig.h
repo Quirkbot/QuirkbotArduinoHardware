@@ -43,7 +43,7 @@
 #define _APP_CONFIG_H_
 
 	#define PRODUCT_DESCRIPTOR_STRING L"Quirkbot"
-	#define MANUFACTURER_DESCRIPTOR_STRING L"Quirkbot (quirkbot.com)"
+	#define MANUFACTURER_DESCRIPTOR_STRING L"QB"
 	#define DEVICE_SID "QUIRKBO"
 	#define DEVICE_VID 0x2886
 	#define DEVICE_PID 0xf005
