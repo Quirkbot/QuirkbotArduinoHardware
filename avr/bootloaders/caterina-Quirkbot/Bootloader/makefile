@@ -18,7 +18,7 @@ F_CPU        = 8000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
 TARGET       = BootloaderCDC
-SRC          = $(TARGET).c Descriptors.c BootloaderAPI.c BootloaderAPITable.S $(LUFA_SRC_USB)
+SRC          = $(TARGET).c Descriptors.c BootloaderAPI.c BootloaderAPITable.S $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
 LUFA_PATH    = ../LUFA/LUFA
 CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -DBOOT_START_ADDR=$(BOOT_START_OFFSET)
 LD_FLAGS     = -Wl,--section-start=.text=$(BOOT_START_OFFSET) $(BOOT_API_LD_FLAGS)
@@ -51,5 +51,7 @@ include $(LUFA_PATH)/Build/lufa_sources.mk
 include $(LUFA_PATH)/Build/lufa_build.mk
 include $(LUFA_PATH)/Build/lufa_cppcheck.mk
 include $(LUFA_PATH)/Build/lufa_doxygen.mk
+include $(LUFA_PATH)/Build/lufa_dfu.mk
+include $(LUFA_PATH)/Build/lufa_hid.mk
 include $(LUFA_PATH)/Build/lufa_avrdude.mk
 include $(LUFA_PATH)/Build/lufa_atprogram.mk

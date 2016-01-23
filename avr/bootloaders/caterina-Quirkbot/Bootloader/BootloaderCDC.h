@@ -44,6 +44,7 @@
 		#include <avr/power.h>
 		#include <avr/interrupt.h>
 		#include <stdbool.h>
+		#include <string.h>
 
 		#include "Descriptors.h"
 		#include "BootloaderAPI.h"
@@ -116,8 +117,8 @@
 			AVR109_COMMAND_EnterProgrammingMode     = 'P',
 			AVR109_COMMAND_LeaveProgrammingMode     = 'L',
 			AVR109_COMMAND_SelectDeviceType         = 'T',
-			//AVR109_COMMAND_SetLED                   = 'x',
-			//AVR109_COMMAND_ClearLED                 = 'y',
+			AVR109_COMMAND_SetLED                   = 'x',
+			AVR109_COMMAND_ClearLED                 = 'y',
 			AVR109_COMMAND_ExitBootloader           = 'E',
 		};
 

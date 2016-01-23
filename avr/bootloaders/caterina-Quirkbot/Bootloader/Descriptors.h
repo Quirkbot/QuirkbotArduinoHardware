@@ -39,6 +39,8 @@
 	/* Includes: */
 		#include <LUFA/Drivers/USB/USB.h>
 
+		#include <avr/pgmspace.h>
+
 		#include "Config/AppConfig.h"
 
 	/* Macros: */
@@ -106,10 +108,10 @@
 		#define CDC_NOTIFICATION_EPSIZE        8
 
 		/** Endpoint address of the MIDI streaming data IN endpoint, for device-to-host data transfers. */
-		#define MIDI_STREAM_IN_EPADDR       (ENDPOINT_DIR_IN  | 4)
+		#define MIDI_STREAM_IN_EPADDR       (ENDPOINT_DIR_IN  | 2)
 
 		/** Endpoint address of the MIDI streaming data OUT endpoint, for host-to-device data transfers. */
-		#define MIDI_STREAM_OUT_EPADDR      (ENDPOINT_DIR_OUT | 5)
+		#define MIDI_STREAM_OUT_EPADDR      (ENDPOINT_DIR_OUT | 1)
 
 		/** Endpoint size in bytes of the Audio isochronous streaming data IN and OUT endpoints. */
 		#define MIDI_STREAM_EPSIZE          64

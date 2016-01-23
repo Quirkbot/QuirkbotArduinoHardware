@@ -36,13 +36,38 @@
 #define  INCLUDE_FROM_BOOTLOADERCDC_C
 #include "BootloaderCDC.h"
 
+/** LUFA MIDI Class driver interface configuration and state information. This structure is
+ *  passed to all MIDI Class driver functions, so that multiple instances of the same class
+ *  within a device can be differentiated from one another.
+ */
+USB_ClassInfo_MIDI_Device_t Keyboard_MIDI_Interface =
+	{
+		.Config =
+			{
+				.StreamingInterfaceNumber = INTERFACE_ID_AudioStream,
+				.DataINEndpoint           =
+					{
+						.Address          = MIDI_STREAM_IN_EPADDR,
+						.Size             = MIDI_STREAM_EPSIZE,
+						.Banks            = 1,
+					},
+				.DataOUTEndpoint          =
+					{
+						.Address          = MIDI_STREAM_OUT_EPADDR,
+						.Size             = MIDI_STREAM_EPSIZE,
+						.Banks            = 1,
+					},
+			},
+	};
+
+
 /** Contains the current baud rate and other settings of the first virtual serial port. This must be retained as some
  *  operating systems will not open the port unless the settings can be set successfully.
  */
 static CDC_LineEncoding_t LineEncoding = { .BaudRateBPS = 0,
 										   .CharFormat  = CDC_LINEENCODING_OneStopBit,
 										   .ParityType  = CDC_PARITY_None,
-										   .DataBits	= 64							};
+										   .DataBits	= 8							};
 
 /** Current address counter. This stores the current address of the FLASH or EEPROM as set by the host,
  *  and is used when reading or writing to the AVRs memory (either FLASH or EEPROM depending on the issued
@@ -88,11 +113,8 @@ void Application_Jump_Check(void)
 		JumpToApplication = true;
 	}
 
-	/* Don't run the user application if the reset vector is blank (no app loaded) */
-	bool ApplicationValid = (pgm_read_word_near(0) != 0xFFFF);
-
 	/* If a request has been made to jump to the user application, honor it */
-	if (JumpToApplication && ApplicationValid)
+	if (JumpToApplication && (pgm_read_word_near(0) != 0xFFFF))
 	{
 		/* Turn off the watchdog */
 		MCUSR &= ~(1 << WDRF);
@@ -183,6 +205,8 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 	Endpoint_ConfigureEndpoint(CDC_TX_EPADDR, EP_TYPE_BULK, CDC_TXRX_EPSIZE, 1);
 
 	Endpoint_ConfigureEndpoint(CDC_RX_EPADDR, EP_TYPE_BULK, CDC_TXRX_EPSIZE, 1);
+
+	MIDI_Device_ConfigureEndpoints(&Keyboard_MIDI_Interface);
 }
 
 /** Event handler for the USB_ControlRequest event. This is used to catch and process control requests sent to
@@ -191,6 +215,7 @@ void EVENT_USB_Device_ConfigurationChanged(void)
  */
 void EVENT_USB_Device_ControlRequest(void)
 {
+
 	/* Ignore any requests that aren't directed to the CDC interface */
 	if ((USB_ControlRequest.bmRequestType & (CONTROL_REQTYPE_TYPE | CONTROL_REQTYPE_RECIPIENT)) !=
 		(REQTYPE_CLASS | REQREC_INTERFACE))
@@ -201,9 +226,11 @@ void EVENT_USB_Device_ControlRequest(void)
 	/* Activity - toggle indicator LEDs */
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
 
-	/* Process CDC specific control requests */
+
+	/* Process the control requests */
 	switch (USB_ControlRequest.bRequest)
 	{
+		/* Process CDC specific control requests */
 		case CDC_REQ_GetLineEncoding:
 			if (USB_ControlRequest.bmRequestType == (REQDIR_DEVICETOHOST | REQTYPE_CLASS | REQREC_INTERFACE))
 			{
@@ -234,6 +261,9 @@ void EVENT_USB_Device_ControlRequest(void)
 			}
 
 			break;
+		/* Default to a MIDI control requests */
+		default:
+			MIDI_Device_ProcessControlRequest(&Keyboard_MIDI_Interface);
 	}
 }
 
@@ -427,14 +457,14 @@ static void CDC_Task(void)
 		/* Send confirmation byte back to the host */
 		WriteNextResponseByte('\r');
 	}
-	//else if ((Command == AVR109_COMMAND_SetLED) || (Command == AVR109_COMMAND_ClearLED) ||
-	//		 (Command == AVR109_COMMAND_SelectDeviceType))
-	//{
-	//	FetchNextCommandByte();
-	//
-	//	/* Send confirmation byte back to the host */
-	//	WriteNextResponseByte('\r');
-	//}
+	else if ((Command == AVR109_COMMAND_SetLED) || (Command == AVR109_COMMAND_ClearLED) ||
+			 (Command == AVR109_COMMAND_SelectDeviceType))
+	{
+		FetchNextCommandByte();
+
+		/* Send confirmation byte back to the host */
+		WriteNextResponseByte('\r');
+	}
 	else if ((Command == AVR109_COMMAND_EnterProgrammingMode) || (Command == AVR109_COMMAND_LeaveProgrammingMode))
 	{
 		/* Send confirmation byte back to the host */
@@ -482,20 +512,20 @@ static void CDC_Task(void)
 		WriteNextResponseByte(AVR_SIGNATURE_2);
 		WriteNextResponseByte(AVR_SIGNATURE_1);
 	}
-	else if (Command == AVR109_COMMAND_EraseFLASH)
-	{
-		/* Clear the application section of flash */
-		for (uint32_t CurrFlashAddress = 0; CurrFlashAddress < (uint32_t)BOOT_START_ADDR; CurrFlashAddress += SPM_PAGESIZE)
-		{
-			boot_page_erase(CurrFlashAddress);
-			boot_spm_busy_wait();
-			boot_page_write(CurrFlashAddress);
-			boot_spm_busy_wait();
-		}
-
-		/* Send confirmation byte back to the host */
-		WriteNextResponseByte('\r');
-	}
+	// else if (Command == AVR109_COMMAND_EraseFLASH)
+	// {
+	// 	/* Clear the application section of flash */
+	// 	for (uint32_t CurrFlashAddress = 0; CurrFlashAddress < (uint32_t)BOOT_START_ADDR; CurrFlashAddress += SPM_PAGESIZE)
+	// 	{
+	// 		boot_page_erase(CurrFlashAddress);
+	// 		boot_spm_busy_wait();
+	// 		boot_page_write(CurrFlashAddress);
+	// 		boot_spm_busy_wait();
+	// 	}
+	//
+	// 	/* Send confirmation byte back to the host */
+	// 	WriteNextResponseByte('\r');
+	// }
 	#if !defined(NO_LOCK_BYTE_WRITE_SUPPORT)
 	else if (Command == AVR109_COMMAND_WriteLockbits)
 	{
