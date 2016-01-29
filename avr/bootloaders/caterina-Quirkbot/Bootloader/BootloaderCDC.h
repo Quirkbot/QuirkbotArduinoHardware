@@ -105,7 +105,7 @@
 			AVR109_COMMAND_ReadLowFuses             = 'F',
 			AVR109_COMMAND_ReadLockbits             = 'r',
 			AVR109_COMMAND_WriteLockbits            = 'l',
-			AVR109_COMMAND_EraseFLASH               = 'e',
+			//AVR109_COMMAND_EraseFLASH               = 'e',
 			AVR109_COMMAND_ReadSignature            = 's',
 			AVR109_COMMAND_ReadBootloaderSWVersion  = 'V',
 			AVR109_COMMAND_ReadBootloaderHWVersion  = 'v',
@@ -117,8 +117,8 @@
 			AVR109_COMMAND_EnterProgrammingMode     = 'P',
 			AVR109_COMMAND_LeaveProgrammingMode     = 'L',
 			AVR109_COMMAND_SelectDeviceType         = 'T',
-			AVR109_COMMAND_SetLED                   = 'x',
-			AVR109_COMMAND_ClearLED                 = 'y',
+			//AVR109_COMMAND_SetLED                   = 'x',
+			//AVR109_COMMAND_ClearLED                 = 'y',
 			AVR109_COMMAND_ExitBootloader           = 'E',
 		};
 

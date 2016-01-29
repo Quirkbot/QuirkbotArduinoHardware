@@ -145,7 +145,28 @@ int main(void)
 
 	while (RunBootloader)
 	{
+		MIDI_EventPacket_t ReceivedMIDIEvent;
+		if (MIDI_Device_ReceiveEventPacket(&Keyboard_MIDI_Interface, &ReceivedMIDIEvent))
+		{
+
+			LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
+			uint8_t code = ReceivedMIDIEvent.Data1 - 0x80;
+			code = code >> 2;
+
+			uint8_t byte1 = (ReceivedMIDIEvent.Data1 & 0x3) << 6;
+			byte1 = byte1 + (ReceivedMIDIEvent.Data2 >> 1);
+
+			uint8_t byte2 = (ReceivedMIDIEvent.Data2 & 0x1) << 7;
+			byte2 = byte2 + ReceivedMIDIEvent.Data3;
+
+			//WriteNextResponseByte(code);
+			WriteNextResponseByte(byte1);
+			WriteNextResponseByte(byte2);
+
+
+		}
 		CDC_Task();
+		MIDI_Device_USBTask(&Keyboard_MIDI_Interface);
 		USB_USBTask();
 	}
 
@@ -191,6 +212,26 @@ static void SetupHardware(void)
 ISR(TIMER1_OVF_vect, ISR_BLOCK)
 {
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
+
+	/*uint8_t MIDICommand = MIDI_COMMAND_NOTE_ON;
+	MIDI_EventPacket_t MIDIEvent = (MIDI_EventPacket_t)
+		{
+			.Event       = MIDI_EVENT(0, MIDICommand),
+
+			.Data1       = MIDICommand | MIDI_CHANNEL(1),
+			.Data2       = 0x3C,
+			.Data3       = MIDI_STANDARD_VELOCITY,
+		};
+
+	MIDI_Device_SendEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent);
+	MIDI_Device_Flush(&Keyboard_MIDI_Interface);*/
+
+	/*WriteNextResponseByte(250);
+	WriteNextResponseByte(251);
+	WriteNextResponseByte(0);
+	WriteNextResponseByte(252);
+	WriteNextResponseByte(255);*/
+
 }
 
 /** Event handler for the USB_ConfigurationChanged event. This configures the device's endpoints ready
@@ -222,10 +263,6 @@ void EVENT_USB_Device_ControlRequest(void)
 	{
 		return;
 	}
-
-	/* Activity - toggle indicator LEDs */
-	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
-
 
 	/* Process the control requests */
 	switch (USB_ControlRequest.bRequest)
@@ -275,6 +312,9 @@ void EVENT_USB_Device_ControlRequest(void)
  */
 static void ReadWriteMemoryBlock(const uint8_t Command)
 {
+	/* LED feedback */
+	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
+
 	uint16_t BlockSize;
 	char	 MemoryType;
 
@@ -286,13 +326,15 @@ static void ReadWriteMemoryBlock(const uint8_t Command)
 
 	MemoryType =  FetchNextCommandByte();
 
-	if ((MemoryType != MEMORY_TYPE_FLASH) && (MemoryType != MEMORY_TYPE_EEPROM))
-	{
-		/* Send error byte back to the host */
-		WriteNextResponseByte('?');
+	// NOTE: Commented out everythig related to EEPROM to save some bytes
 
-		return;
-	}
+	// if ((MemoryType != MEMORY_TYPE_FLASH) && (MemoryType != MEMORY_TYPE_EEPROM))
+	// {
+	// 	/* Send error byte back to the host */
+	// 	WriteNextResponseByte('?');
+	//
+	// 	return;
+	// }
 
 	/* Check if command is to read a memory block */
 	if (Command == AVR109_COMMAND_BlockRead)
@@ -302,8 +344,8 @@ static void ReadWriteMemoryBlock(const uint8_t Command)
 
 		while (BlockSize--)
 		{
-			if (MemoryType == MEMORY_TYPE_FLASH)
-			{
+			//if (MemoryType == MEMORY_TYPE_FLASH)
+			//{
 				/* Read the next FLASH byte from the current FLASH page */
 				#if (FLASHEND > 0xFFFF)
 				WriteNextResponseByte(pgm_read_byte_far(CurrAddress | HighByte));
@@ -316,31 +358,31 @@ static void ReadWriteMemoryBlock(const uint8_t Command)
 				  CurrAddress += 2;
 
 				HighByte = !HighByte;
-			}
-			else
-			{
-				/* Read the next EEPROM byte into the endpoint */
-				WriteNextResponseByte(eeprom_read_byte((uint8_t*)(intptr_t)(CurrAddress >> 1)));
-
-				/* Increment the address counter after use */
-				CurrAddress += 2;
-			}
+			// }
+			// else
+			// {
+			// 	/* Read the next EEPROM byte into the endpoint */
+			// 	WriteNextResponseByte(eeprom_read_byte((uint8_t*)(intptr_t)(CurrAddress >> 1)));
+			//
+			// 	/* Increment the address counter after use */
+			// 	CurrAddress += 2;
+			// }
 		}
 	}
 	else
 	{
 		uint32_t PageStartAddress = CurrAddress;
 
-		if (MemoryType == MEMORY_TYPE_FLASH)
-		{
+		// if (MemoryType == MEMORY_TYPE_FLASH)
+		// {
 			boot_page_erase(PageStartAddress);
 			boot_spm_busy_wait();
-		}
+		// }
 
 		while (BlockSize--)
 		{
-			if (MemoryType == MEMORY_TYPE_FLASH)
-			{
+			// if (MemoryType == MEMORY_TYPE_FLASH)
+			// {
 				/* If both bytes in current word have been written, increment the address counter */
 				if (HighByte)
 				{
@@ -356,26 +398,26 @@ static void ReadWriteMemoryBlock(const uint8_t Command)
 				}
 
 				HighByte = !HighByte;
-			}
-			else
-			{
-				/* Write the next EEPROM byte from the endpoint */
-				eeprom_write_byte((uint8_t*)((intptr_t)(CurrAddress >> 1)), FetchNextCommandByte());
-
-				/* Increment the address counter after use */
-				CurrAddress += 2;
-			}
+			// }
+			// else
+			// {
+			// 	/* Write the next EEPROM byte from the endpoint */
+			// 	eeprom_write_byte((uint8_t*)((intptr_t)(CurrAddress >> 1)), FetchNextCommandByte());
+			//
+			// 	/* Increment the address counter after use */
+			// 	CurrAddress += 2;
+			// }
 		}
 
 		/* If in FLASH programming mode, commit the page after writing */
-		if (MemoryType == MEMORY_TYPE_FLASH)
-		{
+		// if (MemoryType == MEMORY_TYPE_FLASH)
+		// {
 			/* Commit the flash page to memory */
 			boot_page_write(PageStartAddress);
 
 			/* Wait until write operation has completed */
 			boot_spm_busy_wait();
-		}
+		// }
 
 		/* Send response byte back to the host */
 		WriteNextResponseByte('\r');
@@ -457,8 +499,7 @@ static void CDC_Task(void)
 		/* Send confirmation byte back to the host */
 		WriteNextResponseByte('\r');
 	}
-	else if ((Command == AVR109_COMMAND_SetLED) || (Command == AVR109_COMMAND_ClearLED) ||
-			 (Command == AVR109_COMMAND_SelectDeviceType))
+	else if (Command == AVR109_COMMAND_SelectDeviceType) // NOTE: Quirkbot removed AVR109_COMMAND_SetLED and AVR109_COMMAND_ClearLED to save a few bytes, they are no really useful
 	{
 		FetchNextCommandByte();
 
@@ -498,8 +539,13 @@ static void CDC_Task(void)
 	else if (Command == AVR109_COMMAND_ReadBootloaderIdentifier)
 	{
 		/* Write the 7-byte software identifier to the endpoint */
-		for (uint8_t CurrByte = 0; CurrByte < 7; CurrByte++)
-		  WriteNextResponseByte(SOFTWARE_IDENTIFIER[CurrByte]);
+		WriteNextResponseByte(SOFTWARE_IDENTIFIER[0]);
+		WriteNextResponseByte(SOFTWARE_IDENTIFIER[1]);
+		WriteNextResponseByte(SOFTWARE_IDENTIFIER[2]);
+		WriteNextResponseByte(SOFTWARE_IDENTIFIER[3]);
+		WriteNextResponseByte(SOFTWARE_IDENTIFIER[4]);
+		WriteNextResponseByte(SOFTWARE_IDENTIFIER[5]);
+		WriteNextResponseByte(SOFTWARE_IDENTIFIER[6]);
 	}
 	else if (Command == AVR109_COMMAND_ReadBootloaderSWVersion)
 	{
@@ -526,32 +572,32 @@ static void CDC_Task(void)
 	// 	/* Send confirmation byte back to the host */
 	// 	WriteNextResponseByte('\r');
 	// }
-	#if !defined(NO_LOCK_BYTE_WRITE_SUPPORT)
-	else if (Command == AVR109_COMMAND_WriteLockbits)
-	{
-		/* Set the lock bits to those given by the host */
-		boot_lock_bits_set(FetchNextCommandByte());
-
-		/* Send confirmation byte back to the host */
-		WriteNextResponseByte('\r');
-	}
-	#endif
-	else if (Command == AVR109_COMMAND_ReadLockbits)
-	{
-		WriteNextResponseByte(boot_lock_fuse_bits_get(GET_LOCK_BITS));
-	}
-	else if (Command == AVR109_COMMAND_ReadLowFuses)
-	{
-		WriteNextResponseByte(boot_lock_fuse_bits_get(GET_LOW_FUSE_BITS));
-	}
-	else if (Command == AVR109_COMMAND_ReadHighFuses)
-	{
-		WriteNextResponseByte(boot_lock_fuse_bits_get(GET_HIGH_FUSE_BITS));
-	}
-	else if (Command == AVR109_COMMAND_ReadExtendedFuses)
-	{
-		WriteNextResponseByte(boot_lock_fuse_bits_get(GET_EXTENDED_FUSE_BITS));
-	}
+	// #if !defined(NO_LOCK_BYTE_WRITE_SUPPORT)
+	// else if (Command == AVR109_COMMAND_WriteLockbits)
+	// {
+	// 	/* Set the lock bits to those given by the host */
+	// 	boot_lock_bits_set(FetchNextCommandByte());
+	//
+	// 	/* Send confirmation byte back to the host */
+	// 	WriteNextResponseByte('\r');
+	// }
+	// #endif
+	// else if (Command == AVR109_COMMAND_ReadLockbits)
+	// {
+	// 	WriteNextResponseByte(boot_lock_fuse_bits_get(GET_LOCK_BITS));
+	// }
+	// else if (Command == AVR109_COMMAND_ReadLowFuses)
+	// {
+	// 	WriteNextResponseByte(boot_lock_fuse_bits_get(GET_LOW_FUSE_BITS));
+	// }
+	// else if (Command == AVR109_COMMAND_ReadHighFuses)
+	// {
+	// 	WriteNextResponseByte(boot_lock_fuse_bits_get(GET_HIGH_FUSE_BITS));
+	// }
+	// else if (Command == AVR109_COMMAND_ReadExtendedFuses)
+	// {
+	// 	WriteNextResponseByte(boot_lock_fuse_bits_get(GET_EXTENDED_FUSE_BITS));
+	// }
 	#if !defined(NO_BLOCK_SUPPORT)
 	else if (Command == AVR109_COMMAND_GetBlockWriteSupport)
 	{
@@ -567,70 +613,70 @@ static void CDC_Task(void)
 		ReadWriteMemoryBlock(Command);
 	}
 	#endif
-	#if !defined(NO_FLASH_BYTE_SUPPORT)
-	else if (Command == AVR109_COMMAND_FillFlashPageWordHigh)
-	{
-		/* Write the high byte to the current flash page */
-		boot_page_fill(CurrAddress, FetchNextCommandByte());
-
-		/* Send confirmation byte back to the host */
-		WriteNextResponseByte('\r');
-	}
-	else if (Command == AVR109_COMMAND_FillFlashPageWordLow)
-	{
-		/* Write the low byte to the current flash page */
-		boot_page_fill(CurrAddress | 0x01, FetchNextCommandByte());
-
-		/* Increment the address */
-		CurrAddress += 2;
-
-		/* Send confirmation byte back to the host */
-		WriteNextResponseByte('\r');
-	}
-	else if (Command == AVR109_COMMAND_WriteFlashPage)
-	{
-		/* Commit the flash page to memory */
-		boot_page_write(CurrAddress);
-
-		/* Wait until write operation has completed */
-		boot_spm_busy_wait();
-
-		/* Send confirmation byte back to the host */
-		WriteNextResponseByte('\r');
-	}
-	else if (Command == AVR109_COMMAND_ReadFLASHWord)
-	{
-		#if (FLASHEND > 0xFFFF)
-		uint16_t ProgramWord = pgm_read_word_far(CurrAddress);
-		#else
-		uint16_t ProgramWord = pgm_read_word(CurrAddress);
-		#endif
-
-		WriteNextResponseByte(ProgramWord >> 8);
-		WriteNextResponseByte(ProgramWord & 0xFF);
-	}
-	#endif
-	#if !defined(NO_EEPROM_BYTE_SUPPORT)
-	else if (Command == AVR109_COMMAND_WriteEEPROM)
-	{
-		/* Read the byte from the endpoint and write it to the EEPROM */
-		eeprom_write_byte((uint8_t*)((intptr_t)(CurrAddress >> 1)), FetchNextCommandByte());
-
-		/* Increment the address after use */
-		CurrAddress += 2;
-
-		/* Send confirmation byte back to the host */
-		WriteNextResponseByte('\r');
-	}
-	else if (Command == AVR109_COMMAND_ReadEEPROM)
-	{
-		/* Read the EEPROM byte and write it to the endpoint */
-		WriteNextResponseByte(eeprom_read_byte((uint8_t*)((intptr_t)(CurrAddress >> 1))));
-
-		/* Increment the address after use */
-		CurrAddress += 2;
-	}
-	#endif
+	// #if !defined(NO_FLASH_BYTE_SUPPORT)
+	// else if (Command == AVR109_COMMAND_FillFlashPageWordHigh)
+	// {
+	// 	/* Write the high byte to the current flash page */
+	// 	boot_page_fill(CurrAddress, FetchNextCommandByte());
+	//
+	// 	/* Send confirmation byte back to the host */
+	// 	WriteNextResponseByte('\r');
+	// }
+	// else if (Command == AVR109_COMMAND_FillFlashPageWordLow)
+	// {
+	// 	/* Write the low byte to the current flash page */
+	// 	boot_page_fill(CurrAddress | 0x01, FetchNextCommandByte());
+	//
+	// 	/* Increment the address */
+	// 	CurrAddress += 2;
+	//
+	// 	/* Send confirmation byte back to the host */
+	// 	WriteNextResponseByte('\r');
+	// }
+	// else if (Command == AVR109_COMMAND_WriteFlashPage)
+	// {
+	// 	/* Commit the flash page to memory */
+	// 	boot_page_write(CurrAddress);
+	//
+	// 	/* Wait until write operation has completed */
+	// 	boot_spm_busy_wait();
+	//
+	// 	/* Send confirmation byte back to the host */
+	// 	WriteNextResponseByte('\r');
+	// }
+	// else if (Command == AVR109_COMMAND_ReadFLASHWord)
+	// {
+	// 	#if (FLASHEND > 0xFFFF)
+	// 	uint16_t ProgramWord = pgm_read_word_far(CurrAddress);
+	// 	#else
+	// 	uint16_t ProgramWord = pgm_read_word(CurrAddress);
+	// 	#endif
+	//
+	// 	WriteNextResponseByte(ProgramWord >> 8);
+	// 	WriteNextResponseByte(ProgramWord & 0xFF);
+	// }
+	// #endif
+	// #if !defined(NO_EEPROM_BYTE_SUPPORT)
+	// else if (Command == AVR109_COMMAND_WriteEEPROM)
+	// {
+	// 	/* Read the byte from the endpoint and write it to the EEPROM */
+	// 	eeprom_write_byte((uint8_t*)((intptr_t)(CurrAddress >> 1)), FetchNextCommandByte());
+	//
+	// 	/* Increment the address after use */
+	// 	CurrAddress += 2;
+	//
+	// 	/* Send confirmation byte back to the host */
+	// 	WriteNextResponseByte('\r');
+	// }
+	// else if (Command == AVR109_COMMAND_ReadEEPROM)
+	// {
+	// 	/* Read the EEPROM byte and write it to the endpoint */
+	// 	WriteNextResponseByte(eeprom_read_byte((uint8_t*)((intptr_t)(CurrAddress >> 1))));
+	//
+	// 	/* Increment the address after use */
+	// 	CurrAddress += 2;
+	// }
+	// #endif
 	else if (Command != AVR109_COMMAND_Sync)
 	{
 		/* Unknown (non-sync) command, return fail code */
