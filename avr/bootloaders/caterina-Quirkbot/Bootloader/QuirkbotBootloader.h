@@ -30,7 +30,7 @@
 
 /** \file
  *
- *  Header file for BootloaderCDC.c.
+ *  Header file for QuirkbotBootloader.c.
  */
 
 #ifndef _CDC_H_
@@ -122,11 +122,22 @@
 			AVR109_COMMAND_ExitBootloader           = 'E',
 		};
 
+		/** Possible MIDI commands that can be issued to the bootloader. */
+		enum MIDI_Commands
+		{
+			MIDI_COMMAND_Sync                       = 0x0,
+			MIDI_COMMAND_EnterBootloader            = 0x1, /* For user program to enter bootloader */
+			MIDI_COMMAND_StartProgrammingPage       = 0x2,
+			MIDI_COMMAND_WritePageWord     	        = 0x3,
+			MIDI_COMMAND_ExitBootloader             = 0x4,
+		};
+
 	/* Type Defines: */
 		/** Type define for a non-returning pointer to the start of the loaded application in flash memory. */
 		typedef void (*AppPtr_t)(void) ATTR_NO_RETURN;
 
 	/* Function Prototypes: */
+		static void MIDI_Task(void);
 		static void CDC_Task(void);
 		static void SetupHardware(void);
 

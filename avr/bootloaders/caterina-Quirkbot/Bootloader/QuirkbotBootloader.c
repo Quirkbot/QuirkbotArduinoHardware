@@ -28,13 +28,43 @@
   this software.
 */
 
+/*
+			Quirkbot Bootloader
+	Copyright (C) Paulo Barcelos, 2016.
+
+		paulo [at] quirkbot [dot] com
+			   quirkbot.com
+*/
+
+/*
+  Copyright 2016 Paulo Barcelos (paulo [at] quirkbot [dot] com)
+
+  Permission to use, copy, modify, distribute, and sell this
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting
+  documentation, and that the name of the author not be used in
+  advertising or publicity pertaining to distribution of the
+  software without specific, written prior permission.
+
+  The author disclaims all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness.  In no event shall the author be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
+*/
+
 /** \file
  *
- *  Main source file for the CDC class bootloader. This file contains the complete bootloader logic.
+ *  Main source file for the Quirkbot bootloader. This file contains the complete bootloader logic.
  */
 
 #define  INCLUDE_FROM_BOOTLOADERCDC_C
-#include "BootloaderCDC.h"
+#include "QuirkbotBootloader.h"
 
 /** LUFA MIDI Class driver interface configuration and state information. This structure is
  *  passed to all MIDI Class driver functions, so that multiple instances of the same class
@@ -73,7 +103,11 @@ static CDC_LineEncoding_t LineEncoding = { .BaudRateBPS = 0,
  *  and is used when reading or writing to the AVRs memory (either FLASH or EEPROM depending on the issued
  *  command.)
  */
-static uint32_t CurrAddress;
+static uint16_t CurrAddress;
+
+/** Addres of the current page being written.
+ */
+static uint16_t PageStartAddress;
 
 /** Flag to indicate if the bootloader should be running, or should exit and allow the application code to run
  *  via a watchdog reset. When cleared the bootloader will exit, starting the watchdog and entering an infinite
@@ -145,26 +179,7 @@ int main(void)
 
 	while (RunBootloader)
 	{
-		MIDI_EventPacket_t ReceivedMIDIEvent;
-		if (MIDI_Device_ReceiveEventPacket(&Keyboard_MIDI_Interface, &ReceivedMIDIEvent))
-		{
-
-			LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
-			uint8_t code = ReceivedMIDIEvent.Data1 - 0x80;
-			code = code >> 2;
-
-			uint8_t byte1 = (ReceivedMIDIEvent.Data1 & 0x3) << 6;
-			byte1 = byte1 + (ReceivedMIDIEvent.Data2 >> 1);
-
-			uint8_t byte2 = (ReceivedMIDIEvent.Data2 & 0x1) << 7;
-			byte2 = byte2 + ReceivedMIDIEvent.Data3;
-
-			//WriteNextResponseByte(code);
-			WriteNextResponseByte(byte1);
-			WriteNextResponseByte(byte2);
-
-
-		}
+		MIDI_Task();
 		CDC_Task();
 		MIDI_Device_USBTask(&Keyboard_MIDI_Interface);
 		USB_USBTask();
@@ -312,9 +327,6 @@ void EVENT_USB_Device_ControlRequest(void)
  */
 static void ReadWriteMemoryBlock(const uint8_t Command)
 {
-	/* LED feedback */
-	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
-
 	uint16_t BlockSize;
 	char	 MemoryType;
 
@@ -371,7 +383,7 @@ static void ReadWriteMemoryBlock(const uint8_t Command)
 	}
 	else
 	{
-		uint32_t PageStartAddress = CurrAddress;
+		PageStartAddress = CurrAddress;
 
 		// if (MemoryType == MEMORY_TYPE_FLASH)
 		// {
@@ -477,6 +489,76 @@ static void WriteNextResponseByte(const uint8_t Response)
 	Endpoint_Write_8(Response);
 }
 
+/** Task to read in MIDI commands from MIDI_Device_ReceiveEventPacket, process them, perform the required actions
+ *  and send the appropriate response back to the host.
+ */
+static void MIDI_Task(void)
+{
+	/* Check if there is any events sent from the host */
+	MIDI_EventPacket_t MIDIEvent;
+	if (!MIDI_Device_ReceiveEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent))
+		return;
+
+	/* Toggle LEDs for feedback */
+	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
+
+	/* Decode the bootloader bytes (4, 8, 8 bits) out of the MIDI bytes (7, 7, 7 bits)  */
+	uint8_t Command = MIDIEvent.Data1 - 0x80;
+	Command = Command >> 2;
+
+	uint8_t byte1 = (MIDIEvent.Data1 & 0x3) << 6;
+	byte1 = byte1 + (MIDIEvent.Data2 >> 1);
+
+	uint8_t byte2 = (MIDIEvent.Data2 & 0x1) << 7;
+	byte2 = byte2 + MIDIEvent.Data3;
+
+
+	/* Resolve the different commands */
+	if (Command == MIDI_COMMAND_ExitBootloader)
+	{
+		RunBootloader = false;
+	}
+	else if (Command == MIDI_COMMAND_StartProgrammingPage)
+	{
+		/** Store the start page address, set the current address to match it
+		 * and erase the page on that address.
+		 */
+		PageStartAddress = byte1 << 8;
+		PageStartAddress |= byte2;
+		CurrAddress = PageStartAddress;
+		BootloaderAPI_ErasePage(PageStartAddress);
+	}
+	else if (Command == MIDI_COMMAND_WritePageWord)
+	{
+		/* Fill the bytes on the current address and increment the addres counter */
+		boot_page_fill(CurrAddress, (byte1 << 8) | byte2);
+		CurrAddress += 2;
+
+		/* If the end of the page was reached, write the page */
+		if(CurrAddress >= SPM_PAGESIZE){
+			BootloaderAPI_WritePage(PageStartAddress);
+		}
+	}
+	else if(!Command == MIDI_COMMAND_Sync){
+		/* If the command is not registered return */
+		return;
+	}
+
+	/** Send the acknowledgment to the host. Create the response by reusing the
+	 * same incomming MIDI packet to save some bytes */
+	MIDIEvent = (MIDI_EventPacket_t)
+		{
+			.Event       = 0x08,
+			.Data1       = 0x80,
+			.Data2       = 0x00,
+			.Data3       = 0x00,
+		};
+	MIDI_Device_SendEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent);
+	MIDI_Device_Flush(&Keyboard_MIDI_Interface);
+
+
+}
+
 /** Task to read in AVR109 commands from the CDC data OUT endpoint, process them, perform the required actions
  *  and send the appropriate response back to the host.
  */
@@ -488,6 +570,9 @@ static void CDC_Task(void)
 	/* Check if endpoint has a command in it sent from the host */
 	if (!(Endpoint_IsOUTReceived()))
 	  return;
+
+	  /* LED feedback */
+	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
 
 	/* Read in the bootloader command (first byte sent from host) */
 	uint8_t Command = FetchNextCommandByte();

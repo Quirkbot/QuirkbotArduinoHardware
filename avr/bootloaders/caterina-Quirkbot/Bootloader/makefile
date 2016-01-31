@@ -17,17 +17,23 @@ BOARD        = QUIRKBOT
 F_CPU        = 8000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
-TARGET       = BootloaderCDC
-SRC          = $(TARGET).c Descriptors.c BootloaderAPI.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
+TARGET       = QuirkbotBootloader
+SRC          = $(TARGET).c Descriptors.c BootloaderAPI.c BootloaderAPITable.S $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
 LUFA_PATH    = ../LUFA/LUFA
-CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -DBOOT_START_ADDR=$(BOOT_START_OFFSET)
-LD_FLAGS     = -Wl,--section-start=.text=$(BOOT_START_OFFSET)
+
+# Signatures to allow user program to detect if bootloader is installed.
+# 0x5142 is equal to "QB" in a char to hex conversion.
+BOOTLOADER_ID_SIG = 0x5142
+BOOTLOADER_VERSION_SIG = 0x0001
+
+CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -DBOOT_START_ADDR=$(BOOT_START_OFFSET) -DBOOTLOADER_ID_SIG=$(BOOTLOADER_ID_SIG) -DBOOTLOADER_VERSION_SIG=$(BOOTLOADER_VERSION_SIG)
+LD_FLAGS     = -Wl,--section-start=.text=$(BOOT_START_OFFSET) $(BOOT_API_LD_FLAGS)
 
 # Flash size and bootloader section sizes of the target, in KB. These must
 # match the target's total FLASH size and the bootloader size set in the
 # device's fuses.
 FLASH_SIZE_KB         = 32
-BOOT_SECTION_SIZE_KB  = 4
+BOOT_SECTION_SIZE_KB  = 8
 
 # Bootloader address calculation formulas
 # Do not modify these macros, but rather modify the dependent values above.
@@ -38,8 +44,8 @@ BOOT_SEC_OFFSET       = $(call CALC_ADDRESS_IN_HEX, ($(FLASH_SIZE_KB) * 1024) - 
 # Bootloader linker section flags for relocating the API table sections to
 # known FLASH addresses - these should not normally be user-edited.
 BOOT_SECTION_LD_FLAG  = -Wl,--section-start=$(strip $(1))=$(call BOOT_SEC_OFFSET, $(3)) -Wl,--undefined=$(strip $(2))
-BOOT_API_LD_FLAGS     = $(call BOOT_SECTION_LD_FLAG, .apitable_trampolines, BootloaderAPI_Trampolines, 96)
-BOOT_API_LD_FLAGS    += $(call BOOT_SECTION_LD_FLAG, .apitable_jumptable,   BootloaderAPI_JumpTable,   32)
+#BOOT_API_LD_FLAGS     = $(call BOOT_SECTION_LD_FLAG, .apitable_trampolines, BootloaderAPI_Trampolines, 96)
+#BOOT_API_LD_FLAGS    += $(call BOOT_SECTION_LD_FLAG, .apitable_jumptable,   BootloaderAPI_JumpTable,   32)
 BOOT_API_LD_FLAGS    += $(call BOOT_SECTION_LD_FLAG, .apitable_signatures,  BootloaderAPI_Signatures,  8)
 
 # Default target
