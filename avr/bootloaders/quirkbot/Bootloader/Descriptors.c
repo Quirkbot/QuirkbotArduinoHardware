@@ -78,7 +78,7 @@ const USB_Descriptor_Device_t DeviceDescriptor =
 	.Header                 = {.Size = sizeof(USB_Descriptor_Device_t), .Type = DTYPE_Device},
 
 	.USBSpecification       = VERSION_BCD(2,0,0),
-	.Class                  = CDC_CSCP_CDCClass,
+	.Class                  = 0xEF,
 	.SubClass               = CDC_CSCP_ACMSubclass,
 	.Protocol               = CDC_CSCP_ATCommandProtocol,
 
@@ -399,6 +399,9 @@ const USB_Descriptor_String_t LanguageString = USB_STRING_DESCRIPTOR_ARRAY(LANGU
 /** Manufacturer descriptor string. This is a Unicode string containing the manufacturer's details in human readable
  *  form, and is read out upon request by the host when the appropriate string ID is requested, listed in the Device
  *  Descriptor.
+ */
+/** NOTE: This is commented out because we decided to use ProductString for both the product and the manufacturer
+ * in order to save space.
  */
 //const USB_Descriptor_String_t ManufacturerString = USB_STRING_DESCRIPTOR(MANUFACTURER_DESCRIPTOR_STRING);
 
