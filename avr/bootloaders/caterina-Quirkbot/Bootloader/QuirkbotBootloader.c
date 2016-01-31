@@ -135,20 +135,16 @@ void Application_Jump_Check(void)
 	uint8_t  mcusr_state = MCUSR;		// store the initial state of the Status register
 	MCUSR = 0;							// clear all reset flags
 
-	if (mcusr_state & (1<<EXTRF)) {
-		// External reset -  we should continue to self-programming mode.
-	}
-	else if (mcusr_state & (1<<PORF)) {
-		// After a power-on reset skip the bootloader
-		JumpToApplication = true;
-	}
-	else if (MagicBootKey == MAGIC_BOOT_KEY) {
-		// If the magic
-		JumpToApplication = true;
-	}
-
 	/* If a request has been made to jump to the user application, honor it */
-	if (JumpToApplication && (pgm_read_word_near(0) != 0xFFFF))
+	if (
+		// If it's not an external reset
+		!(mcusr_state & (1<<EXTRF))
+		// And after a power-on reset...
+		&& ((mcusr_state & (1<<PORF))
+		// ... or Boot Key is set
+		|| MagicBootKey == MAGIC_BOOT_KEY)
+		// And there is a firmware in memory
+		&& (pgm_read_word_near(0) != 0xFFFF))
 	{
 		/* Turn off the watchdog */
 		MCUSR &= ~(1 << WDRF);
@@ -227,26 +223,6 @@ static void SetupHardware(void)
 ISR(TIMER1_OVF_vect, ISR_BLOCK)
 {
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
-
-	/*uint8_t MIDICommand = MIDI_COMMAND_NOTE_ON;
-	MIDI_EventPacket_t MIDIEvent = (MIDI_EventPacket_t)
-		{
-			.Event       = MIDI_EVENT(0, MIDICommand),
-
-			.Data1       = MIDICommand | MIDI_CHANNEL(1),
-			.Data2       = 0x3C,
-			.Data3       = MIDI_STANDARD_VELOCITY,
-		};
-
-	MIDI_Device_SendEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent);
-	MIDI_Device_Flush(&Keyboard_MIDI_Interface);*/
-
-	/*WriteNextResponseByte(250);
-	WriteNextResponseByte(251);
-	WriteNextResponseByte(0);
-	WriteNextResponseByte(252);
-	WriteNextResponseByte(255);*/
-
 }
 
 /** Event handler for the USB_ConfigurationChanged event. This configures the device's endpoints ready
@@ -338,16 +314,6 @@ static void ReadWriteMemoryBlock(const uint8_t Command)
 
 	MemoryType =  FetchNextCommandByte();
 
-	// NOTE: Commented out everythig related to EEPROM to save some bytes
-
-	// if ((MemoryType != MEMORY_TYPE_FLASH) && (MemoryType != MEMORY_TYPE_EEPROM))
-	// {
-	// 	/* Send error byte back to the host */
-	// 	WriteNextResponseByte('?');
-	//
-	// 	return;
-	// }
-
 	/* Check if command is to read a memory block */
 	if (Command == AVR109_COMMAND_BlockRead)
 	{
@@ -356,80 +322,40 @@ static void ReadWriteMemoryBlock(const uint8_t Command)
 
 		while (BlockSize--)
 		{
-			//if (MemoryType == MEMORY_TYPE_FLASH)
-			//{
-				/* Read the next FLASH byte from the current FLASH page */
-				#if (FLASHEND > 0xFFFF)
-				WriteNextResponseByte(pgm_read_byte_far(CurrAddress | HighByte));
-				#else
-				WriteNextResponseByte(pgm_read_byte(CurrAddress | HighByte));
-				#endif
 
-				/* If both bytes in current word have been read, increment the address counter */
-				if (HighByte)
-				  CurrAddress += 2;
+			#if (FLASHEND > 0xFFFF)
+			WriteNextResponseByte(pgm_read_byte_far(CurrAddress | HighByte));
+			#else
+			WriteNextResponseByte(pgm_read_byte(CurrAddress | HighByte));
+			#endif
 
-				HighByte = !HighByte;
-			// }
-			// else
-			// {
-			// 	/* Read the next EEPROM byte into the endpoint */
-			// 	WriteNextResponseByte(eeprom_read_byte((uint8_t*)(intptr_t)(CurrAddress >> 1)));
-			//
-			// 	/* Increment the address counter after use */
-			// 	CurrAddress += 2;
-			// }
+			/* If both bytes in current word have been read, increment the address counter */
+			if (HighByte)
+			  CurrAddress += 2;
+
+			HighByte = !HighByte;
 		}
 	}
 	else
 	{
-		PageStartAddress = CurrAddress;
-
-		// if (MemoryType == MEMORY_TYPE_FLASH)
-		// {
-			boot_page_erase(PageStartAddress);
-			boot_spm_busy_wait();
-		// }
+		Boot_ErasePage();
 
 		while (BlockSize--)
 		{
-			// if (MemoryType == MEMORY_TYPE_FLASH)
-			// {
-				/* If both bytes in current word have been written, increment the address counter */
-				if (HighByte)
-				{
-					/* Write the next FLASH word to the current FLASH page */
-					boot_page_fill(CurrAddress, ((FetchNextCommandByte() << 8) | LowByte));
+			/* If both bytes in current word have been written, increment the address counter */
+			if (HighByte)
+			{
+				Boot_FillWord(FetchNextCommandByte(), LowByte);
+			}
+			else
+			{
+				LowByte = FetchNextCommandByte();
+			}
 
-					/* Increment the address counter after use */
-					CurrAddress += 2;
-				}
-				else
-				{
-					LowByte = FetchNextCommandByte();
-				}
-
-				HighByte = !HighByte;
-			// }
-			// else
-			// {
-			// 	/* Write the next EEPROM byte from the endpoint */
-			// 	eeprom_write_byte((uint8_t*)((intptr_t)(CurrAddress >> 1)), FetchNextCommandByte());
-			//
-			// 	/* Increment the address counter after use */
-			// 	CurrAddress += 2;
-			// }
+			HighByte = !HighByte;
 		}
 
-		/* If in FLASH programming mode, commit the page after writing */
-		// if (MemoryType == MEMORY_TYPE_FLASH)
-		// {
-			/* Commit the flash page to memory */
-			boot_page_write(PageStartAddress);
-
-			/* Wait until write operation has completed */
-			boot_spm_busy_wait();
-		// }
+		Boot_WritePage();
 
 		/* Send response byte back to the host */
 		WriteNextResponseByte('\r');
@@ -523,20 +449,19 @@ static void MIDI_Task(void)
 		/** Store the start page address, set the current address to match it
 		 * and erase the page on that address.
 		 */
-		PageStartAddress = byte1 << 8;
-		PageStartAddress |= byte2;
-		CurrAddress = PageStartAddress;
-		BootloaderAPI_ErasePage(PageStartAddress);
+		CurrAddress = byte1 << 8;
+		CurrAddress |= byte2;
+
+		Boot_ErasePage();
 	}
 	else if (Command == MIDI_COMMAND_WritePageWord)
 	{
 		/* Fill the bytes on the current address and increment the addres counter */
-		boot_page_fill(CurrAddress, (byte1 << 8) | byte2);
-		CurrAddress += 2;
+		Boot_FillWord(byte1, byte2);
 
 		/* If the end of the page was reached, write the page */
 		if(CurrAddress >= SPM_PAGESIZE){
-			BootloaderAPI_WritePage(PageStartAddress);
+			Boot_WritePage();
 		}
 	}
 	else if(!Command == MIDI_COMMAND_Sync){
@@ -631,6 +556,7 @@ static void CDC_Task(void)
 		WriteNextResponseByte(SOFTWARE_IDENTIFIER[4]);
 		WriteNextResponseByte(SOFTWARE_IDENTIFIER[5]);
 		WriteNextResponseByte(SOFTWARE_IDENTIFIER[6]);
+
 	}
 	else if (Command == AVR109_COMMAND_ReadBootloaderSWVersion)
 	{
@@ -803,3 +729,31 @@ static void CDC_Task(void)
 	Endpoint_ClearOUT();
 }
 
+
+/** Erases the page in the current address from memory. */
+static void Boot_ErasePage(void)
+{
+	PageStartAddress = CurrAddress;
+	boot_page_erase(PageStartAddress);
+	boot_spm_busy_wait();
+}
+
+/** Fills in a word in the current address */
+static void Boot_FillWord(uint8_t HighByte, uint8_t LowByte)
+{
+	/* Write the next FLASH word to the current FLASH page */
+	boot_page_fill(CurrAddress, (HighByte << 8) | LowByte);
+
+	/* Increment the address counter after use */
+	CurrAddress += 2;
+}
+
+/** Commits the page in the current address to the memory */
+static void Boot_WritePage(void)
+{
+	/* Commit the flash page to memory */
+	boot_page_write(PageStartAddress);
+
+	/* Wait until write operation has completed */
+	boot_spm_busy_wait();
+}

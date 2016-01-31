@@ -42,8 +42,12 @@
 #ifndef _APP_CONFIG_H_
 #define _APP_CONFIG_H_
 
+	/** NOTE: To save space, we decided to use the same descriptor for both the
+	 * product and the manufacturer strings
+	 */
 	#define PRODUCT_DESCRIPTOR_STRING L"Quirkbot"
-	#define MANUFACTURER_DESCRIPTOR_STRING L"Quirkbot"
+	//#define MANUFACTURER_DESCRIPTOR_STRING L"Quirkb"
+
 	#define DEVICE_SID "QUIRKBO"
 	#define DEVICE_VID 0x2886
 	#define DEVICE_PID 0xf005

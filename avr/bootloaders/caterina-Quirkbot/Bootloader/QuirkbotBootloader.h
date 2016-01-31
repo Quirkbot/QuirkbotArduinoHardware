@@ -141,9 +141,14 @@
 		static void CDC_Task(void);
 		static void SetupHardware(void);
 
+		static void Boot_ErasePage(void);
+		static void Boot_FillWord(uint8_t HighByte, uint8_t LowByte);
+		static void Boot_WritePage(void);
+
 		void Application_Jump_Check(void) ATTR_INIT_SECTION(3);
 
 		void EVENT_USB_Device_ConfigurationChanged(void);
+
 
 		#if defined(INCLUDE_FROM_BOOTLOADERCDC_C) || defined(__DOXYGEN__)
 			#if !defined(NO_BLOCK_SUPPORT)
