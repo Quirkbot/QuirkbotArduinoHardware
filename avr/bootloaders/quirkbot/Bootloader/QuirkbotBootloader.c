@@ -680,7 +680,7 @@ ISR(TIMER1_OVF_vect, ISR_BLOCK)
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
 
 	BootloaderTimer++;
-	if(BootloaderTimer >= BOOTLOADER_TIMEOUT){
+	if(BootloaderTimer >= BOOTLOADER_TIMEOUT && pgm_read_word_near(0) != 0xFFFF){
 		RunBootloader = false;
 	}
 }
