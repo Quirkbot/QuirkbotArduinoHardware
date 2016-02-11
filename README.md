@@ -26,6 +26,8 @@ Build release files for integrating with Arduino's boards index and for manual d
  - From git - https://github.com/arduino-libraries/Keyboard
 - Mouse
  - From git - https://github.com/arduino-libraries/Mouse
+- MIDIUSB
+ - From git - https://github.com/arduino-libraries/MIDIUSB
 - HID
  - Copied from *Arduino AVR Boards*.
  - Check what is the latest version at the [package index](http://downloads.arduino.cc/packages/package_index.json).
