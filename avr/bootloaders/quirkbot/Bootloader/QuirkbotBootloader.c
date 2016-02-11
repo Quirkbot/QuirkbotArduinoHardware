@@ -118,6 +118,10 @@ static uint8_t FirmwarePageBuffer[SPM_PAGESIZE];
 static uint8_t SysexTranscodeIndex;
 static uint8_t SysexTranscodeBuffer[8];
 
+/** A timer that will increase periodically, and if it reaches the timeout value, exits the bootloader.
+ */
+static uint8_t BootloaderTimer = 0;
+
 /** Flag to indicate if the bootloader should be running, or should exit and allow the application code to run
  *  via a watchdog reset. When cleared the bootloader will exit, starting the watchdog and entering an infinite
  *  loop until the AVR restarts and the application runs.
@@ -238,6 +242,9 @@ static void CDC_Task(void)
 	/* Check if endpoint has a command in it sent from the host */
 	if (!(Endpoint_IsOUTReceived()))
 	  return;
+
+	/* Reset the timer */
+	BootloaderTimer = 0;
 
 	/* LED feedback */
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
@@ -483,6 +490,9 @@ static void MIDI_Task(void)
 	if (!MIDI_Device_ReceiveEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent))
 		return;
 
+	/* Reset the timer */
+	BootloaderTimer = 0;
+
 	/* Toggle LEDs for feedback */
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
 
@@ -663,8 +673,14 @@ void EVENT_USB_Device_ControlRequest(void)
 	}
 }
 
-/** ISR to periodically toggle the LEDs on the board to indicate that the bootloader is active. */
+/** ISR to periodically toggle the LEDs on the board to indicate that the bootloader is active,
+ * and to increase and check if the bootloader timeout has expired */
 ISR(TIMER1_OVF_vect, ISR_BLOCK)
 {
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
+
+	BootloaderTimer++;
+	if(BootloaderTimer >= BOOTLOADER_TIMEOUT){
+		RunBootloader = false;
+	}
 }

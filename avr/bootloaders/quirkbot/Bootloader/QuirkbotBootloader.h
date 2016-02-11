@@ -109,6 +109,9 @@
 		/** Magic bootloader key to unlock forced application start mode. */
 		#define MAGIC_BOOT_KEY               BOOT_KEY
 
+		/** BOOTLOADER TIMEOUT. */
+		#define BOOTLOADER_TIMEOUT           30
+
 	/* Enums: */
 		/** Possible memory types that can be addressed via the bootloader. */
 		enum AVR109_Memories
