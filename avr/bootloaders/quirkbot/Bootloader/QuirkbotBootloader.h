@@ -152,41 +152,32 @@
 			AVR109_COMMAND_ExitBootloader           = 'E',
 		};
 
-		/** Possible MIDI commands that can be issued to the bootloader. */
-		enum MIDI_Commands
-		{
-			MIDI_COMMAND_Sync                       = 0x0,
-			MIDI_COMMAND_EnterBootloader            = 0x1, /* For user program to enter bootloader */
-			MIDI_COMMAND_StartProgrammingPage       = 0x2,
-			MIDI_COMMAND_WritePageWord     	        = 0x3,
-			MIDI_COMMAND_ExitBootloader             = 0x4,
-		};
-
 	/* Type Defines: */
 		/** Type define for a non-returning pointer to the start of the loaded application in flash memory. */
 		typedef void (*AppPtr_t)(void) ATTR_NO_RETURN;
 
 	/* Function Prototypes: */
-		static void MIDI_Task(void);
-		static void CDC_Task(void);
-		static void SetupHardware(void);
-
-		static void Boot_ErasePage(void);
-		static void Boot_FillWord(uint8_t HighByte, uint8_t LowByte);
-		static void Boot_WritePage(void);
 
 		void Application_Jump_Check(void) ATTR_INIT_SECTION(3);
 
+		static void SetupHardware(void);
+
+		static void CDC_Task(void);
+		static void CDC_WriteMemoryBlock(void);
+		static void CDC_ReadMemoryBlock(void);
+		static uint8_t CDC_FetchNextCommandByte(void);
+		static void CDC_WriteNextResponseByte(const uint8_t Response);
+		static bool CDC_WaitDelivery(void);
+		static void CDC_Conclude(void);
+
+		static void MIDI_Task(void);
+		static void MIDI_PushSysexByte(uint8_t SysexByte);
+		static void MIDI_TerminateSysexMessage(void);
+
+		static void PushFirmwareByte(uint8_t FirmwareByte);
+
 		void EVENT_USB_Device_ConfigurationChanged(void);
-
-
-		#if defined(INCLUDE_FROM_BOOTLOADERCDC_C) || defined(__DOXYGEN__)
-			#if !defined(NO_BLOCK_SUPPORT)
-			static void    ReadWriteMemoryBlock(const uint8_t Command);
-			#endif
-			static uint8_t FetchNextCommandByte(void);
-			static void    WriteNextResponseByte(const uint8_t Response);
-		#endif
+		void EVENT_USB_Device_ControlRequest(void);
 
 #endif
 

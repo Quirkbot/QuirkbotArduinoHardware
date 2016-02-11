@@ -176,12 +176,6 @@
  *  |   Bootloader Application   |
  *  | (Not User App. Accessible) |
  *  |                            |
- *  +----------------------------+ FLASHEND - 96
- *  |   API Table Trampolines    |
- *  | (Not User App. Accessible) |
- *  +----------------------------+ FLASHEND - 32
- *  |    Bootloader API Table    |
- *  |   (User App. Accessible)   |
  *  +----------------------------+ FLASHEND - 8
  *  |   Bootloader ID Constants  |
  *  |   (User App. Accessible)   |
