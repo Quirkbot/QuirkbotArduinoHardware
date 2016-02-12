@@ -19,22 +19,32 @@ Build release files for integrating with Arduino's boards index and for manual d
 - For manual distribution, use the generated `QuirkbotArduinoHardware.zip` file.
 
 ## Updating dependencies
+*Make sure to keep this updated!*
 ### Arduino Core
 Copied from *Arduino AVR Boards*.
 
 Check what is the latest version at the [package index](http://downloads.arduino.cc/packages/package_index.json).
 
+You need to patch the `D_CONFIG` macro from `USBCore.h` so it reports the board as self powered and with a maximum consumption of 100mA.
+```
+#define D_CONFIG(_totalLength,_interfaces) \
+	{ 9, 2, _totalLength,_interfaces, 1, 0, USB_CONFIG_POWERED_MASK | USB_CONFIG_REMOTE_WAKEUP, USB_CONFIG_POWER_MA(100) }
+```
 ### Libraries
 ##### HID
 Copied from *Arduino AVR Boards*.
 
 Check what is the latest version at the [package index](http://downloads.arduino.cc/packages/package_index.json).
+
 ##### Servo
 From git - https://github.com/arduino-libraries/Servo
+
 ##### Keyboard
 From git - https://github.com/arduino-libraries/Keyboard
+
 ##### Mouse
 From git - https://github.com/arduino-libraries/Mouse
+
 ##### MIDIUSB
 From git - https://github.com/arduino-libraries/MIDIUSB
 
