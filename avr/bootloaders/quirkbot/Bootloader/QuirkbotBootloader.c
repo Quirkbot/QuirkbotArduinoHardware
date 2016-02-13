@@ -104,19 +104,10 @@ static CDC_LineEncoding_t LineEncoding = { .BaudRateBPS = 0,
  */
 static uint16_t CurrAddress;
 
-/** Flags an ongoing MIDI uploader
- */
-static bool DoingMIDIUpload = false;
-
 /** A buffer that will hold all bytes from a page.
  */
 static uint8_t FirmwarePageIndex;
 static uint8_t FirmwarePageBuffer[SPM_PAGESIZE];
-
-/** A small buffer to help us trancode the 7bits sysex data into 8bits bytes.
- */
-static uint8_t SysexTranscodeIndex;
-static uint8_t SysexTranscodeBuffer[8];
 
 /** Timer to indicate if the bootloader should be running, or should exit and allow the application code to run
  *  via a watchdog reset. If it reaches the timeout value the bootloader will exit, starting the watchdog and entering
@@ -501,72 +492,32 @@ static void MIDI_Task(void)
 	/* Toggle LEDs for feedback */
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
 
-	/* Detect the start of the Sysex message */
-	if(DoingMIDIUpload == false)
-	{
-		if(MIDIEvent.Data1 == 0xF0 && MIDIEvent.Data2 == 0x00 && MIDIEvent.Data3 == 0x00)
-		{
-			DoingMIDIUpload = true;
-			SysexTranscodeIndex = 0;
-			FirmwarePageIndex = 0;
-			CurrAddress = 0;
-		}
-	}
-	/* Detect the end of the Sysex message */
-	else if(MIDIEvent.Event == 0x05 || MIDIEvent.Event == 0x06 || MIDIEvent.Event == 0x07 )
-	{
-		MIDI_TerminateSysexMessage();
-		DoingMIDIUpload = false;
+	/* Parse the message */
+	uint8_t Command = (MIDIEvent.Data1 - 0x80) >> 2;
+	uint8_t  Byte1 = ((MIDIEvent.Data1 & 0x3) << 6) | (MIDIEvent.Data2 >> 1);
+	uint8_t  Byte2 = ((MIDIEvent.Data2 & 0x1) << 7) |  MIDIEvent.Data3;
 
+	/* Detect the start of the Sysex message */
+	if(Command == MIDI_COMMAND_StartFirmware)
+	{
+		FirmwarePageIndex = 0;
+		CurrAddress = 0;
+	}
+	else if(Command == MIDI_COMMAND_WriteFirmwareWord)
+	{
+		PushFirmwareByte(Byte1);
+		PushFirmwareByte(Byte2);
+	}
+	else if(Command == MIDI_COMMAND_EndFirmware)
+	{
 		/* Exipre the timer */
 		ExpireBootloaderTimer();
 	}
-	/* Handle the incomming sysex bytes */
-	else {
-		MIDI_PushSysexByte(MIDIEvent.Data1);
-		if(MIDIEvent.Event == 0x04){
-			MIDI_PushSysexByte(MIDIEvent.Data2);
-			MIDI_PushSysexByte(MIDIEvent.Data3);
-		}
-	}
-
-	// /** Send the acknowledgment to the host. **/
-	//MIDI_Device_SendEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent);
-	//MIDI_Device_Flush(&Keyboard_MIDI_Interface);
-}
-
-/** Transcodes the 7 bits sysex bytes and use them to fill in the page bytes
- */
-static void MIDI_PushSysexByte(uint8_t SysexByte)
-{
-	/* Add the byte to the transcode buffer and increase the buffer index */
-	SysexTranscodeBuffer[SysexTranscodeIndex] = SysexByte;
-	SysexTranscodeIndex++;
-
-	/* Once the buffer is full, push the firmware bytes and reset the buffer index */
-	if(SysexTranscodeIndex == 8)
+	else if(Command == MIDI_COMMAND_Sync)
 	{
-		PushFirmwareByte( ((SysexTranscodeBuffer[0]       ) << 1) | (SysexTranscodeBuffer[1] >> 6) );
-		PushFirmwareByte( ((SysexTranscodeBuffer[1] & 0x3F) << 2) | (SysexTranscodeBuffer[2] >> 5) );
-		PushFirmwareByte( ((SysexTranscodeBuffer[2] & 0x1F) << 3) | (SysexTranscodeBuffer[3] >> 4) );
-		PushFirmwareByte( ((SysexTranscodeBuffer[3] & 0x0F) << 4) | (SysexTranscodeBuffer[4] >> 3) );
-		PushFirmwareByte( ((SysexTranscodeBuffer[4] & 0x07) << 5) | (SysexTranscodeBuffer[5] >> 2) );
-		PushFirmwareByte( ((SysexTranscodeBuffer[5] & 0x03) << 6) | (SysexTranscodeBuffer[6] >> 1) );
-		PushFirmwareByte( ((SysexTranscodeBuffer[6] & 0x01) << 7) | (SysexTranscodeBuffer[7]     ) );
-
-		/* Reset the buffer index */
-		SysexTranscodeIndex = 0;
-	}
-}
-
-/** In in case the sysex message reached the end, but the transcode buffer is not full
- * yet, this function will pad it, by pushing blank bytes until the buffer is full
- */
-static void MIDI_TerminateSysexMessage(void)
-{
-	/* Push empty bytes until the buffer is full */
-	while (SysexTranscodeIndex != 0) {
-		MIDI_PushSysexByte(0);
+		/** Send the acknowledgment to the host. **/
+		MIDI_Device_SendEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent);
+		MIDI_Device_Flush(&Keyboard_MIDI_Interface);
 	}
 }
 
@@ -686,8 +637,9 @@ ISR(TIMER1_OVF_vect, ISR_BLOCK)
 {
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
 
-	BootloaderTimer--;
-	if(!BootloaderTimer && (pgm_read_word_near(0) == 0xFFFF)){
-		ResetBootloaderTimer();
+
+	if(pgm_read_word_near(0) != 0xFFFF)
+	{
+		BootloaderTimer--;
 	}
 }

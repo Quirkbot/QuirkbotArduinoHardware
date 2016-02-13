@@ -155,6 +155,16 @@
 			AVR109_COMMAND_ExitBootloader           = 'E',
 		};
 
+		/** Possible MIDI commands that can be issued to the bootloader. */
+		enum MIDI_Commands
+		{
+			MIDI_COMMAND_Sync                       = 0x0,
+			MIDI_COMMAND_EnterBootloader            = 0x1,
+			MIDI_COMMAND_StartFirmware              = 0x2,
+			MIDI_COMMAND_WriteFirmwareWord          = 0x3,
+			MIDI_COMMAND_EndFirmware                = 0x4
+		};
+
 	/* Type Defines: */
 		/** Type define for a non-returning pointer to the start of the loaded application in flash memory. */
 		typedef void (*AppPtr_t)(void) ATTR_NO_RETURN;
@@ -174,8 +184,6 @@
 		static void CDC_Conclude(void);
 
 		static void MIDI_Task(void);
-		static void MIDI_PushSysexByte(uint8_t SysexByte);
-		static void MIDI_TerminateSysexMessage(void);
 
 		static void PushFirmwareByte(uint8_t FirmwareByte);
 
