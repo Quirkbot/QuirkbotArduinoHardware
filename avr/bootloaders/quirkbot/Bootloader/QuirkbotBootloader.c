@@ -118,15 +118,21 @@ static uint8_t FirmwarePageBuffer[SPM_PAGESIZE];
 static uint8_t SysexTranscodeIndex;
 static uint8_t SysexTranscodeBuffer[8];
 
-/** A timer that will increase periodically, and if it reaches the timeout value, exits the bootloader.
+/** Timer to indicate if the bootloader should be running, or should exit and allow the application code to run
+ *  via a watchdog reset. If it reaches the timeout value the bootloader will exit, starting the watchdog and entering
+ *  an infinite loop until the AVR restarts and the application runs.
  */
-static uint8_t BootloaderTimer = 0;
+static uint8_t BootloaderTimer = BOOTLOADER_TIMEOUT;
 
-/** Flag to indicate if the bootloader should be running, or should exit and allow the application code to run
- *  via a watchdog reset. When cleared the bootloader will exit, starting the watchdog and entering an infinite
- *  loop until the AVR restarts and the application runs.
- */
-static bool RunBootloader = true;
+static void ResetBootloaderTimer(void)
+{
+	BootloaderTimer = BOOTLOADER_TIMEOUT;
+}
+static void ExpireBootloaderTimer(void)
+{
+	BootloaderTimer = 0;
+}
+
 
 /** Magic lock for forced application start. If the HWBE fuse is programmed and BOOTRST is unprogrammed, the bootloader
  *  will start if the /HWB line of the AVR is held low and the system is reset. However, if the /HWB line is still held
@@ -141,8 +147,6 @@ uint16_t MagicBootKey ATTR_NO_INIT;
  */
 void Application_Jump_Check(void)
 {
-	bool JumpToApplication = false;
-
 	/* Check the reason for the reset so we can act accordingly */
 	uint8_t  mcusr_state = MCUSR;		// store the initial state of the Status register
 	MCUSR = 0;							// clear all reset flags
@@ -185,7 +189,7 @@ int main(void)
 	/* Enable global interrupts so that the USB stack can function */
 	GlobalInterruptEnable();
 
-	while (RunBootloader)
+	while (BootloaderTimer)
 	{
 		MIDI_Task();
 		CDC_Task();
@@ -244,7 +248,7 @@ static void CDC_Task(void)
 	  return;
 
 	/* Reset the timer */
-	BootloaderTimer = 0;
+	ResetBootloaderTimer();
 
 	/* LED feedback */
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
@@ -254,7 +258,8 @@ static void CDC_Task(void)
 
 	if (Command == AVR109_COMMAND_ExitBootloader)
 	{
-		RunBootloader = false;
+		/* Exipre the timer */
+		ExpireBootloaderTimer();
 
 		/* Send confirmation byte back to the host */
 		CDC_WriteNextResponseByte('\r');
@@ -378,15 +383,15 @@ static void CDC_WriteMemoryBlock(void)
 static void CDC_ReadMemoryBlock(void)
 {
 	boot_rww_enable();
-	for (uint8_t i = 0; i < SPM_PAGESIZE; i+= 2) {
+	for (uint8_t i = 0; i < SPM_PAGESIZE; i++) {
 		uint16_t address = CurrAddress + i;
 
 		#if (FLASHEND > 0xFFFF)
 			CDC_WriteNextResponseByte(pgm_read_byte_far(address));
-			CDC_WriteNextResponseByte(pgm_read_byte_far(address + 1));
+			//CDC_WriteNextResponseByte(pgm_read_byte_far(address + 1));
 		#else
 			CDC_WriteNextResponseByte(pgm_read_byte(address));
-			CDC_WriteNextResponseByte(pgm_read_byte(address + 1));
+			//CDC_WriteNextResponseByte(pgm_read_byte(address + 1));
 		#endif
 	}
 }
@@ -491,7 +496,7 @@ static void MIDI_Task(void)
 		return;
 
 	/* Reset the timer */
-	BootloaderTimer = 0;
+	ResetBootloaderTimer();
 
 	/* Toggle LEDs for feedback */
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
@@ -512,7 +517,9 @@ static void MIDI_Task(void)
 	{
 		MIDI_TerminateSysexMessage();
 		DoingMIDIUpload = false;
-		RunBootloader = false;
+
+		/* Exipre the timer */
+		ExpireBootloaderTimer();
 	}
 	/* Handle the incomming sysex bytes */
 	else {
@@ -679,8 +686,8 @@ ISR(TIMER1_OVF_vect, ISR_BLOCK)
 {
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
 
-	BootloaderTimer++;
-	if(BootloaderTimer >= BOOTLOADER_TIMEOUT && pgm_read_word_near(0) != 0xFFFF){
-		RunBootloader = false;
+	BootloaderTimer--;
+	if(!BootloaderTimer && (pgm_read_word_near(0) == 0xFFFF)){
+		ResetBootloaderTimer();
 	}
 }
