@@ -71,12 +71,8 @@ int MIDI_::getDescriptor(USBSetup& setup __attribute__((unused)))
 
 uint8_t MIDI_::getShortName(char* name)
 {
-	/** QUIRKBOT PATCH: Remove short name to avoid a serial number
-	 *  in the  USB descriptors.
-	 */
-	//memcpy(name, "MIDI", 4);
-	//return 4;
-	return 0;
+	memcpy(name, "MIDI", 4);
+	return 4;
 }
 
 void MIDI_::accept(void)
@@ -111,7 +107,7 @@ void MIDI_::accept(void)
 
 uint32_t MIDI_::available(void)
 {
-
+	
 	ring_bufferMIDI *buffer = &midi_rx_buffer;
 	return (uint32_t)(MIDI_BUFFER_SIZE + buffer->head - buffer->tail) % MIDI_BUFFER_SIZE;
 }
