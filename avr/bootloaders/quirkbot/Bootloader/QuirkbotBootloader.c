@@ -508,7 +508,7 @@ static void MIDI_Task(void)
 		PushFirmwareByte(Byte1);
 		PushFirmwareByte(Byte2);
 	}
-	else if(Command == MIDI_COMMAND_EndFirmware)
+	else if(Command == MIDI_COMMAND_ExitBootloader)
 	{
 		/* Exipre the timer */
 		ExpireBootloaderTimer();

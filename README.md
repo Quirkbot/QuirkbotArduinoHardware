@@ -37,16 +37,16 @@ Copied from *Arduino AVR Boards*.
 Check what is the latest version at the [package index](http://downloads.arduino.cc/packages/package_index.json).
 
 ##### Servo
-From git - https://github.com/arduino-libraries/Servo
+From git - https://github.com/Quirkbot/Servo
 
 ##### Keyboard
-From git - https://github.com/arduino-libraries/Keyboard
+From git - https://github.com/Quirkbot/Keyboard
 
 ##### Mouse
-From git - https://github.com/arduino-libraries/Mouse
+From git - https://github.com/Quirkbot/Mouse
 
 ##### MIDIUSB
-From git - https://github.com/arduino-libraries/MIDIUSB
+From git - https://github.com/Quirkbot/MIDIUSB
 
 You need to patch the `getShortName` function from `MIDIUSB.cpp` so it doesn't set any name (we don't want Arduino to set a serial number in the USB descriptors):
 ```
