@@ -503,7 +503,7 @@ static void MIDI_Task(void)
 		FirmwarePageIndex = 0;
 		CurrAddress = 0;
 	}
-	else if(Command == MIDI_COMMAND_WriteFirmwareWord)
+	else if(Command == MIDI_COMMAND_Data)
 	{
 		PushFirmwareByte(Byte1);
 		PushFirmwareByte(Byte2);

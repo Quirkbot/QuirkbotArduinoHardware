@@ -161,7 +161,7 @@
 			MIDI_COMMAND_Sync                       = 0xa,
 			MIDI_COMMAND_EnterBootloader            = 0xb,
 			MIDI_COMMAND_StartFirmware              = 0xc,
-			MIDI_COMMAND_WriteFirmwareWord          = 0xd,
+			MIDI_COMMAND_Data                       = 0xd,
 			MIDI_COMMAND_ExitBootloader             = 0xe,
 			MIDI_COMMAND_ReadUUID                   = 0xf,
 			MIDI_COMMAND_ReadBootloaderID           = 0x9,
