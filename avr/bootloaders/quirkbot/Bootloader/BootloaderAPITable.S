@@ -64,6 +64,5 @@
 .global BootloaderAPI_Signatures
 BootloaderAPI_Signatures:
 
-	.long BOOT_START_ADDR ; Start address of the bootloader
 	.word BOOTLOADER_VERSION_SIG ; Signature for the CDC + MIDI class bootloader
 	.word BOOTLOADER_ID_SIG ; Signature for Quirkobt class bootloader

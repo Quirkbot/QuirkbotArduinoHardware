@@ -171,10 +171,10 @@ int main(void)
 	/* Fill in the UUID Report */
 	/* Bootloader ID */
 	UUIDReport[0] = BOOTLOADER_ID_SIG >> 8;
-	UUIDReport[1] = BOOTLOADER_ID_SIG & 0x7F;
+	UUIDReport[1] = BOOTLOADER_ID_SIG & 0xFF;
 	/* Bootloader Version */
 	UUIDReport[2] = BOOTLOADER_VERSION_SIG >> 8;
-	UUIDReport[3] = BOOTLOADER_VERSION_SIG & 0x7F;
+	UUIDReport[3] = BOOTLOADER_VERSION_SIG & 0xFF;
 	/* Device ID */
 	for (size_t i = 4; i < UUID_SIZE; i++)
 	{
@@ -243,7 +243,7 @@ static void CDC_Task(void)
 	  return;
 
 	/* LED feedback */
-	//LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
+	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
 
 	/* Read in the bootloader command (first byte sent from host) */
 	uint8_t Command = CDC_FetchNextCommandByte();
@@ -352,7 +352,7 @@ static void CDC_Task(void)
 	{
 
 		/** Send the UUID back to the host. **/
-		for (size_t i = 4; i < UUID_SIZE; i++) {
+		for (size_t i = 0; i < UUID_SIZE; i++) {
 			CDC_WriteNextResponseByte(UUIDReport[i]);
 		}
 
@@ -494,7 +494,7 @@ static void MIDI_Task(void)
 		return;
 
 	/* Toggle LEDs for feedback */
-	//LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
+	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
 
 	/* Parse the message */
 	uint8_t Command = (MIDIEvent.Data1 - 0x80) >> 2;
@@ -517,29 +517,29 @@ static void MIDI_Task(void)
 		/* Exit the booloader */
 		RunBootloader = false;
 	}
-	else if(Command == MIDI_COMMAND_ReadUUID)
-	{
-		/** Send the UUID back to the host. **/
-		Command = MIDI_COMMAND_Data;
-
-		for (size_t i = 4; i < UUID_SIZE; i+=2 ) {
-			Byte1 = UUIDReport[i];
-			Byte2 = UUIDReport[i+1];
-
-			MIDIEvent.Data1 = (Command << 2) | (Byte1 >> 6) | 0x80;
-			MIDIEvent.Data2 = (Byte2 >> 7) | (Byte1 & 0x3F);
-			MIDIEvent.Data3 = Byte2 & 0x7F;
-			MIDI_Device_SendEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent);
-			MIDI_Device_Flush(&Keyboard_MIDI_Interface);
-		}
-
-	}
-	// else if(Command == MIDI_COMMAND_Sync)
+	// else if(Command == MIDI_COMMAND_ReadUUID)
 	// {
-	// 	/** Echo the same message back to the host. **/
-	// 	MIDI_Device_SendEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent);
-	// 	MIDI_Device_Flush(&Keyboard_MIDI_Interface);
+	// 	/** Send the UUID back to the host. **/
+	// 	Command = MIDI_COMMAND_Data;
+	//
+	// 	for (size_t i = 0; i < UUID_SIZE; i+=2 ) {
+	// 		Byte1 = UUIDReport[i];
+	// 		Byte2 = UUIDReport[i+1];
+	//
+	// 		MIDIEvent.Data1 = (Command << 2) | (Byte1 >> 6) | 0x80;
+	// 		MIDIEvent.Data2 = (Byte2 >> 7) | (Byte1 & 0x3F);
+	// 		MIDIEvent.Data3 = Byte2 & 0x7F;
+	// 		MIDI_Device_SendEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent);
+	// 		MIDI_Device_Flush(&Keyboard_MIDI_Interface);
+	// 	}
+	//
 	// }
+	else if(Command == MIDI_COMMAND_Sync)
+	{
+		/** Echo the same message back to the host. **/
+		MIDI_Device_SendEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent);
+		MIDI_Device_Flush(&Keyboard_MIDI_Interface);
+	}
 }
 
 /** Pushes a flash byte into a buffer. When the buffer is full, the page will be
