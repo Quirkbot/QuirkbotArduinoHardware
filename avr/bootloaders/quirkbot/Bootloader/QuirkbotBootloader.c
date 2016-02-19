@@ -89,7 +89,6 @@ USB_ClassInfo_MIDI_Device_t Keyboard_MIDI_Interface =
 					},
 			},
 	};
-
 /** Contains the current baud rate and other settings of the first virtual serial port. This must be retained as some
  *  operating systems will not open the port unless the settings can be set successfully.
  */
@@ -109,21 +108,13 @@ static uint16_t CurrAddress;
 static uint8_t FirmwarePageIndex;
 static uint8_t FirmwarePageBuffer[SPM_PAGESIZE];
 
-/** Timer to indicate if the bootloader should be running, or should exit and allow the application code to run
- *  via a watchdog reset. If it reaches the timeout value the bootloader will exit, starting the watchdog and entering
+static uint8_t UUIDReport[UUID_SIZE];
+
+/** Flag to indicate if the bootloader should be running, or should exit and allow the application code to run
+ *  via a watchdog reset. If false bootloader will exit, starting the watchdog and entering
  *  an infinite loop until the AVR restarts and the application runs.
  */
-static uint8_t BootloaderTimer = BOOTLOADER_TIMEOUT;
-
-static void ResetBootloaderTimer(void)
-{
-	BootloaderTimer = BOOTLOADER_TIMEOUT;
-}
-static void ExpireBootloaderTimer(void)
-{
-	BootloaderTimer = 0;
-}
-
+static bool RunBootloader = true;
 
 /** Magic lock for forced application start. If the HWBE fuse is programmed and BOOTRST is unprogrammed, the bootloader
  *  will start if the /HWB line of the AVR is held low and the system is reset. However, if the /HWB line is still held
@@ -177,10 +168,23 @@ int main(void)
 	/* Turn on first LED on the board to indicate that the bootloader has started */
 	LEDs_SetAllLEDs(LEDS_LED1);
 
+	/* Fill in the UUID Report */
+	/* Bootloader ID */
+	UUIDReport[0] = BOOTLOADER_ID_SIG >> 8;
+	UUIDReport[1] = BOOTLOADER_ID_SIG & 0x7F;
+	/* Bootloader Version */
+	UUIDReport[2] = BOOTLOADER_VERSION_SIG >> 8;
+	UUIDReport[3] = BOOTLOADER_VERSION_SIG & 0x7F;
+	/* Device ID */
+	for (size_t i = 4; i < UUID_SIZE; i++)
+	{
+		UUIDReport[i] = eeprom_read_byte((uint8_t*)(intptr_t)(i));
+	}
+
 	/* Enable global interrupts so that the USB stack can function */
 	GlobalInterruptEnable();
 
-	while (BootloaderTimer)
+	while (RunBootloader)
 	{
 		MIDI_Task();
 		CDC_Task();
@@ -238,19 +242,16 @@ static void CDC_Task(void)
 	if (!(Endpoint_IsOUTReceived()))
 	  return;
 
-	/* Reset the timer */
-	ResetBootloaderTimer();
-
 	/* LED feedback */
-	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
+	//LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
 
 	/* Read in the bootloader command (first byte sent from host) */
 	uint8_t Command = CDC_FetchNextCommandByte();
 
 	if (Command == AVR109_COMMAND_ExitBootloader)
 	{
-		/* Exipre the timer */
-		ExpireBootloaderTimer();
+		/* Exit the bootloader */
+		RunBootloader = false;
 
 		/* Send confirmation byte back to the host */
 		CDC_WriteNextResponseByte('\r');
@@ -303,7 +304,6 @@ static void CDC_Task(void)
 		CDC_WriteNextResponseByte(SOFTWARE_IDENTIFIER[4]);
 		CDC_WriteNextResponseByte(SOFTWARE_IDENTIFIER[5]);
 		CDC_WriteNextResponseByte(SOFTWARE_IDENTIFIER[6]);
-
 	}
 	else if (Command == AVR109_COMMAND_ReadBootloaderSWVersion)
 	{
@@ -337,7 +337,7 @@ static void CDC_Task(void)
 		CDC_FetchNextCommandByte();
 
 		/* For clarity, handle the write/read commands in their dedicated methods */
-		if(Command == AVR109_COMMAND_BlockWrite)
+		if (Command == AVR109_COMMAND_BlockWrite)
 		{
 			CDC_WriteMemoryBlock();
 			/* Send response byte back to the host */
@@ -347,6 +347,15 @@ static void CDC_Task(void)
 		{
 			CDC_ReadMemoryBlock();
 		}
+	}
+	else if (Command == AVR109_COMMAND_ReadUUID)
+	{
+
+		/** Send the UUID back to the host. **/
+		for (size_t i = 4; i < UUID_SIZE; i++) {
+			CDC_WriteNextResponseByte(UUIDReport[i]);
+		}
+
 	}
 	else if (Command != AVR109_COMMAND_Sync)
 	{
@@ -379,10 +388,8 @@ static void CDC_ReadMemoryBlock(void)
 
 		#if (FLASHEND > 0xFFFF)
 			CDC_WriteNextResponseByte(pgm_read_byte_far(address));
-			//CDC_WriteNextResponseByte(pgm_read_byte_far(address + 1));
 		#else
 			CDC_WriteNextResponseByte(pgm_read_byte(address));
-			//CDC_WriteNextResponseByte(pgm_read_byte(address + 1));
 		#endif
 	}
 }
@@ -486,11 +493,8 @@ static void MIDI_Task(void)
 	if (!MIDI_Device_ReceiveEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent))
 		return;
 
-	/* Reset the timer */
-	ResetBootloaderTimer();
-
 	/* Toggle LEDs for feedback */
-	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
+	//LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
 
 	/* Parse the message */
 	uint8_t Command = (MIDIEvent.Data1 - 0x80) >> 2;
@@ -510,15 +514,32 @@ static void MIDI_Task(void)
 	}
 	else if(Command == MIDI_COMMAND_ExitBootloader)
 	{
-		/* Exipre the timer */
-		ExpireBootloaderTimer();
+		/* Exit the booloader */
+		RunBootloader = false;
 	}
-	else if(Command == MIDI_COMMAND_Sync)
+	else if(Command == MIDI_COMMAND_ReadUUID)
 	{
-		/** Send the acknowledgment to the host. **/
-		MIDI_Device_SendEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent);
-		MIDI_Device_Flush(&Keyboard_MIDI_Interface);
+		/** Send the UUID back to the host. **/
+		Command = MIDI_COMMAND_Data;
+
+		for (size_t i = 4; i < UUID_SIZE; i+=2 ) {
+			Byte1 = UUIDReport[i];
+			Byte2 = UUIDReport[i+1];
+
+			MIDIEvent.Data1 = (Command << 2) | (Byte1 >> 6) | 0x80;
+			MIDIEvent.Data2 = (Byte2 >> 7) | (Byte1 & 0x3F);
+			MIDIEvent.Data3 = Byte2 & 0x7F;
+			MIDI_Device_SendEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent);
+			MIDI_Device_Flush(&Keyboard_MIDI_Interface);
+		}
+
 	}
+	// else if(Command == MIDI_COMMAND_Sync)
+	// {
+	// 	/** Echo the same message back to the host. **/
+	// 	MIDI_Device_SendEventPacket(&Keyboard_MIDI_Interface, &MIDIEvent);
+	// 	MIDI_Device_Flush(&Keyboard_MIDI_Interface);
+	// }
 }
 
 /** Pushes a flash byte into a buffer. When the buffer is full, the page will be
@@ -636,10 +657,4 @@ void EVENT_USB_Device_ControlRequest(void)
 ISR(TIMER1_OVF_vect, ISR_BLOCK)
 {
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
-
-
-	if(pgm_read_word_near(0) != 0xFFFF)
-	{
-		BootloaderTimer--;
-	}
 }

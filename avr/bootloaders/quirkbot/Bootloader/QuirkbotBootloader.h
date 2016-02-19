@@ -75,6 +75,7 @@
 		#include <avr/interrupt.h>
 		#include <stdbool.h>
 		#include <string.h>
+		#include <stdlib.h>
 
 		#include "Descriptors.h"
 		#include "BootloaderAPI.h"
@@ -109,8 +110,13 @@
 		/** Magic bootloader key to unlock forced application start mode. */
 		#define MAGIC_BOOT_KEY               BOOT_KEY
 
-		/** BOOTLOADER TIMEOUT. */
-		#define BOOTLOADER_TIMEOUT           30
+		/** Size of the UUID report */
+		#define UUID_SIZE                    16
+
+		/** UUID report delimiters */
+		#define UUID_REPORT_START_DELIMITER  0xFA
+		#define UUID_REPORT_ID_DELIMITER     0xFB
+		#define UUID_REPORT_END_DELIMITER    0xFF
 
 	/* Enums: */
 		/** Possible memory types that can be addressed via the bootloader. */
@@ -153,6 +159,7 @@
 			//AVR109_COMMAND_SetLED                   = 'x',
 			//AVR109_COMMAND_ClearLED                 = 'y',
 			AVR109_COMMAND_ExitBootloader           = 'E',
+			AVR109_COMMAND_ReadUUID                 = 'U',
 		};
 
 		/** Possible MIDI commands that can be issued to the bootloader. */
@@ -164,8 +171,6 @@
 			MIDI_COMMAND_Data                       = 0xd,
 			MIDI_COMMAND_ExitBootloader             = 0xe,
 			MIDI_COMMAND_ReadUUID                   = 0xf,
-			MIDI_COMMAND_ReadBootloaderID           = 0x9,
-			MIDI_COMMAND_ReadBootloaderVersion      = 0x8
 		};
 
 	/* Type Defines: */
