@@ -57,6 +57,12 @@ npm run gulp -- deploy --environment=production
 ```
 - Make sure to update the [Unofficial list of 3rd party boards support urls](https://github.com/arduino/Arduino/wiki/Unofficial-list-of-3rd-party-boards-support-urls).
 
+## Deploying to NPM registry
+When you are completely satisfied with the deployed release, run:
+```
+npm publish
+```
+
 ## Updating dependencies
 *Make sure to keep this updated!*
 
