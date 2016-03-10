@@ -20,7 +20,7 @@ For security, those files should not be included on the repository.
 
 Examples:
 
-### `/aws-config/stage.json`
+#### `/aws-config/stage.json`
 
 ```
 {
@@ -31,7 +31,7 @@ Examples:
 }
 
 ```
-### `/aws-config/production.json`
+#### `/aws-config/production.json`
 
 ```
 {
@@ -55,13 +55,12 @@ or
 ```
 npm run gulp -- deploy --environment=production
 ```
-- Make sure to update the [Unofficial list of 3rd party boards support urls](https://github.com/arduino/Arduino/wiki/Unofficial-list-of-3rd-party-boards-support-urls).
-
-## Deploying to NPM registry
-When you are completely satisfied with the deployed release, run:
+- When you are completely satisfied with the deployed release, run:
 ```
 npm publish
 ```
+- Make a manual [Github release](https://github.com/Quirkbot/QuirkbotArduinoHardware/releases) and upload the generated _quirkbot-arduino-hardware-*.zip_.
+- Make sure to update the [Unofficial list of 3rd party boards support urls](https://github.com/arduino/Arduino/wiki/Unofficial-list-of-3rd-party-boards-support-urls).
 
 ## Updating dependencies
 *Make sure to keep this updated!*
