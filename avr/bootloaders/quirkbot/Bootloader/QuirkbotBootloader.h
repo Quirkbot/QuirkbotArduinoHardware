@@ -75,9 +75,9 @@
 		#include <avr/interrupt.h>
 		#include <stdbool.h>
 		#include <string.h>
+		#include <stdlib.h>
 
 		#include "Descriptors.h"
-		#include "BootloaderAPI.h"
 		#include "Config/AppConfig.h"
 
 		#include "Board/LEDs.h"
@@ -109,8 +109,13 @@
 		/** Magic bootloader key to unlock forced application start mode. */
 		#define MAGIC_BOOT_KEY               BOOT_KEY
 
-		/** BOOTLOADER TIMEOUT. */
-		#define BOOTLOADER_TIMEOUT           30
+		/** Size of the UUID report */
+		#define UUID_SIZE                    16
+
+		/** UUID report delimiters */
+		#define UUID_REPORT_START_DELIMITER  0xFA
+		#define UUID_REPORT_ID_DELIMITER     0xFB
+		#define UUID_REPORT_END_DELIMITER    0xFF
 
 	/* Enums: */
 		/** Possible memory types that can be addressed via the bootloader. */
@@ -124,24 +129,24 @@
 		enum AVR109_Commands
 		{
 			AVR109_COMMAND_Sync                     = 27,
-			AVR109_COMMAND_ReadEEPROM               = 'd',
-			AVR109_COMMAND_WriteEEPROM              = 'D',
-			AVR109_COMMAND_ReadFLASHWord            = 'R',
-			AVR109_COMMAND_WriteFlashPage           = 'm',
-			AVR109_COMMAND_FillFlashPageWordLow     = 'c',
-			AVR109_COMMAND_FillFlashPageWordHigh    = 'C',
+			//AVR109_COMMAND_ReadEEPROM               = 'd',
+			//AVR109_COMMAND_WriteEEPROM              = 'D',
+			//AVR109_COMMAND_ReadFLASHWord            = 'R',
+			//AVR109_COMMAND_WriteFlashPage           = 'm',
+			//AVR109_COMMAND_FillFlashPageWordLow     = 'c',
+			//AVR109_COMMAND_FillFlashPageWordHigh    = 'C',
 			AVR109_COMMAND_GetBlockWriteSupport     = 'b',
 			AVR109_COMMAND_BlockWrite               = 'B',
 			AVR109_COMMAND_BlockRead                = 'g',
-			AVR109_COMMAND_ReadExtendedFuses        = 'Q',
-			AVR109_COMMAND_ReadHighFuses            = 'N',
-			AVR109_COMMAND_ReadLowFuses             = 'F',
-			AVR109_COMMAND_ReadLockbits             = 'r',
-			AVR109_COMMAND_WriteLockbits            = 'l',
+			//AVR109_COMMAND_ReadExtendedFuses        = 'Q',
+			//AVR109_COMMAND_ReadHighFuses            = 'N',
+			//AVR109_COMMAND_ReadLowFuses             = 'F',
+			//AVR109_COMMAND_ReadLockbits             = 'r',
+			//AVR109_COMMAND_WriteLockbits            = 'l',
 			//AVR109_COMMAND_EraseFLASH               = 'e',
 			AVR109_COMMAND_ReadSignature            = 's',
 			AVR109_COMMAND_ReadBootloaderSWVersion  = 'V',
-			AVR109_COMMAND_ReadBootloaderHWVersion  = 'v',
+			//AVR109_COMMAND_ReadBootloaderHWVersion  = 'v',
 			AVR109_COMMAND_ReadBootloaderIdentifier = 'S',
 			AVR109_COMMAND_ReadBootloaderInterface  = 'p',
 			AVR109_COMMAND_SetCurrentAddress        = 'A',
@@ -153,19 +158,18 @@
 			//AVR109_COMMAND_SetLED                   = 'x',
 			//AVR109_COMMAND_ClearLED                 = 'y',
 			AVR109_COMMAND_ExitBootloader           = 'E',
+			AVR109_COMMAND_ReadUUID                 = 'U',
 		};
 
 		/** Possible MIDI commands that can be issued to the bootloader. */
 		enum MIDI_Commands
 		{
 			MIDI_COMMAND_Sync                       = 0xa,
-			MIDI_COMMAND_EnterBootloader            = 0xb,
+			//MIDI_COMMAND_EnterBootloader            = 0xb,
 			MIDI_COMMAND_StartFirmware              = 0xc,
 			MIDI_COMMAND_Data                       = 0xd,
 			MIDI_COMMAND_ExitBootloader             = 0xe,
-			MIDI_COMMAND_ReadUUID                   = 0xf,
-			MIDI_COMMAND_ReadBootloaderID           = 0x9,
-			MIDI_COMMAND_ReadBootloaderVersion      = 0x8
+			//MIDI_COMMAND_ReadUUID                   = 0xf,
 		};
 
 	/* Type Defines: */

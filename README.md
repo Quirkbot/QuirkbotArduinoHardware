@@ -1,25 +1,71 @@
 # Quirkbot Arduino Hardware
 ## Building releases
-Build release files for integrating with Arduino's boards index and for manual distribution.
 
-- Run ```$ sh build-release.sh```
-- Copy the ```SIZE``` and ```CHECKSUM``` outputs.
-- Update ```package_quirkbot.com_index.json``` with the copied ```SIZE``` and ```CHECKSUM``` using this format (make sure to also update the package version accordingly):
+You should build and test the release before deploying them:
+
+- Install node dependencies:
+```
+npm install
+```
+- Update the version in `package.json`
+- Run:
+```
+npm run gulp -- build
+```
+
+## Deploying Releases
+To deploy to Amazon S3, please create the corresponding configuration
+files in `/aws-config/[environment].json`.
+For security, those files should not be included on the repository.
+
+Examples:
+
+### `/aws-config/stage.json`
 
 ```
-...
-"version": "{UPDATED-VERSION-NUMBER}",
-"archiveFileName": "quirkbot-avr.tar.bz2",
-"checksum": "SHA-256:{CHECKSUM}",
-"size": "{SIZE}",
+{
+  "key": "YOUR_S3_KEY",
+  "secret": "YOUR_S3_SECRET",
+  "bucket": "code-stage.quirkbot.com",
+  "region": "us-east-1"
+}
 
-...
 ```
-- Host all the files and make sure to update the [Unofficial list of 3rd party boards support urls](https://github.com/arduino/Arduino/wiki/Unofficial-list-of-3rd-party-boards-support-urls).
-- For manual distribution, use the generated `QuirkbotArduinoHardware.zip` file.
+### `/aws-config/production.json`
+
+```
+{
+  "key": "YOUR_S3_KEY",
+  "secret": "YOUR_S3_SECRET",
+  "bucket": "code.quirkbot.com",
+  "region": "us-east-1"
+}
+
+```
+
+Before deploying, please run the "Building Releases" instructions and make sure
+everything works as desired. When you are ready to deploy:
+
+- Update the version in `package.json`
+- Run:
+```
+npm run gulp -- deploy --environment=stage
+```
+or
+```
+npm run gulp -- deploy --environment=production
+```
+- Make sure to update the [Unofficial list of 3rd party boards support urls](https://github.com/arduino/Arduino/wiki/Unofficial-list-of-3rd-party-boards-support-urls).
+
+## Deploying to NPM registry
+When you are completely satisfied with the deployed release, run:
+```
+npm publish
+```
 
 ## Updating dependencies
 *Make sure to keep this updated!*
+
 ### Arduino Core
 Copied from *Arduino AVR Boards*.
 
@@ -30,6 +76,48 @@ You need to patch the `D_CONFIG` macro from `USBCore.h` so it reports the board 
 #define D_CONFIG(_totalLength,_interfaces) \
 	{ 9, 2, _totalLength,_interfaces, 1, 0, USB_CONFIG_POWERED_MASK | USB_CONFIG_REMOTE_WAKEUP, USB_CONFIG_POWER_MA(100) }
 ```
+
+You need to patch `CDC.cpp` auto-reset routine. Replace the content of lines 95 - 137 with:
+```
+if (CDC_SET_LINE_CODING == r || CDC_SET_CONTROL_LINE_STATE == r)
+{
+	if (1200 == _usbLineInfo.dwDTERate && (_usbLineInfo.lineState & 0x01) == 0)
+	{
+		*(uint16_t *)0x0800 = 0x7777;
+		wdt_enable(WDTO_120MS);
+		for (;;);
+	}
+	else
+	{
+		wdt_disable();
+		wdt_reset();
+	}
+}
+```
+
+You need to patch `USBCore.cpp` `USB_Send` function. We want to remove the 250
+timeout completely.
+
+Replace the block:
+```
+u8 n = USB_SendSpace(ep);
+if (n == 0)
+{
+    if (!(--timeout))
+        return -1;
+    delay(1);
+    continue;
+}
+```
+With:
+```
+u8 n = USB_SendSpace(ep);
+if (n == 0)
+{
+    return -1;
+}
+```
+
 ### Libraries
 ##### HID
 Copied from *Arduino AVR Boards*.

@@ -1,0 +1,15 @@
+{
+	"packages": [
+		{
+			"name": "quirkbot",
+			"maintainer": "Quirkbot",
+			"websiteURL": "https://github.com/Quirkbot/QuirkbotArduinoHardware",
+			"email": "support@quirkbot.com",
+			"help": {
+				"online": "https://github.com/Quirkbot/QuirkbotArduinoHardware/issues"
+			},
+			"platforms": {{PLATFORMS}},
+			"tools": []
+		}
+	]
+}
