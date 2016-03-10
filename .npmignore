@@ -7,6 +7,8 @@ build-release.sh
 stino.settings
 QuirkbotArduinoHardware.zip
 Quirkbot.zip
+quirkbot-arduino-hardware-*
 *.gch
 s3-publish.sh
 s3_publish
+aws-config
