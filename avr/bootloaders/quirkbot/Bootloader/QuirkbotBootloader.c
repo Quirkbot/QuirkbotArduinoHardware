@@ -151,6 +151,9 @@ void Application_Jump_Check(void)
 		/* Clear the boot key and jump to the user application */
 		MagicBootKey = 0;
 
+		/* Re-enable watchdog by default, user application can turn it off if needed. */
+		wdt_enable(WDTO_500MS);
+
 		// cppcheck-suppress constStatement
 		((void (*)(void))0x0000)();
 	}
