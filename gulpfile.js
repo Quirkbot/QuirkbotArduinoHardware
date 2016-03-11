@@ -60,7 +60,8 @@ gulp.task('bundle:zip', function (cb){
 		`cd ${RELEASE_NAME}`
 		+ ` && zip -vr ${ZIP_FILENAME} avr -x "*.DS_Store"`
 		+ ` && cd ..`
-		+ ` && mv  ${path.join(RELEASE_NAME, ZIP_FILENAME)} ${ZIP_FILENAME}`,
+		+ ` && mv  ${path.join(RELEASE_NAME, ZIP_FILENAME)} ${ZIP_FILENAME}`
+		+ ` && rm  -r ${RELEASE_NAME}`,
 		(error, stdout, stderr) => {
 			cb(error);
 		}
