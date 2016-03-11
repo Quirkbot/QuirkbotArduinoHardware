@@ -21,7 +21,7 @@ quirkbot.bootloader.tool=avrdude
 quirkbot.bootloader.low_fuses=0xff
 quirkbot.bootloader.high_fuses=0xd8
 quirkbot.bootloader.extended_fuses=0xce
-quirkbot.bootloader.file=caterina-Quirkbot/Caterina-Quirkbot.hex
+quirkbot.bootloader.file=Quirkbot/QuirkbotBootloader.hex
 quirkbot.bootloader.unlock_bits=0x3F
 quirkbot.bootloader.lock_bits=0x2F
 
@@ -30,7 +30,7 @@ quirkbot.build.f_cpu=8000000L
 quirkbot.build.vid=0x2886
 quirkbot.build.pid=0xf005
 quirkbot.build.usb_product="Quirkbot"
-quirkbot.build.usb_manufacturer="Quirkbot (quirkbot.com)"
+quirkbot.build.usb_manufacturer="Quirkbot"
 quirkbot.build.board=AVR_QUIRKBOT
 quirkbot.build.core=arduino
 quirkbot.build.variant=quirkbot

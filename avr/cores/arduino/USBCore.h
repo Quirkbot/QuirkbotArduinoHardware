@@ -1,18 +1,18 @@
 
-// Copyright (c) 2010, Peter Barrett 
+// Copyright (c) 2010, Peter Barrett
 /*
-** Permission to use, copy, modify, and/or distribute this software for  
-** any purpose with or without fee is hereby granted, provided that the  
-** above copyright notice and this permission notice appear in all copies.  
-**  
-** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL  
-** WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED  
-** WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR  
-** BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES  
-** OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,  
-** WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,  
-** ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS  
-** SOFTWARE.  
+** Permission to use, copy, modify, and/or distribute this software for
+** any purpose with or without fee is hereby granted, provided that the
+** above copyright notice and this permission notice appear in all copies.
+**
+** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+** WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+** WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR
+** BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES
+** OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+** WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+** ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+** SOFTWARE.
 */
 
 #ifndef __USBCORE_H__
@@ -123,8 +123,8 @@
 #define CDC_CS_ENDPOINT                         0x25
 #define CDC_DATA_INTERFACE_CLASS                0x0A
 
-#define MSC_SUBCLASS_SCSI						0x06 
-#define MSC_PROTOCOL_BULK_ONLY					0x50 
+#define MSC_SUBCLASS_SCSI						0x06
+#define MSC_PROTOCOL_BULK_ONLY					0x50
 
 //	Device
 typedef struct {
@@ -215,7 +215,7 @@ typedef struct
 	u8 d0;
 } CDCCSInterfaceDescriptor4;
 
-typedef struct 
+typedef struct
 {
     u8	len;
     u8 	dtype;		// 0x24
@@ -223,8 +223,8 @@ typedef struct
     u8 	bmCapabilities;
     u8 	bDataInterface;
 } CMFunctionalDescriptor;
-	
-typedef struct 
+
+typedef struct
 {
     u8	len;
     u8 	dtype;		// 0x24
@@ -232,13 +232,13 @@ typedef struct
     u8 	bmCapabilities;
 } ACMFunctionalDescriptor;
 
-typedef struct 
+typedef struct
 {
 	//	IAD
 	IADDescriptor				iad;	// Only needed on compound device
 
 	//	Control
-	InterfaceDescriptor			cif;	// 
+	InterfaceDescriptor			cif;	//
 	CDCCSInterfaceDescriptor	header;
 	CMFunctionalDescriptor		callManagement;			// Call Management
 	ACMFunctionalDescriptor		controlManagement;		// ACM
@@ -251,7 +251,7 @@ typedef struct
 	EndpointDescriptor			out;
 } CDCDescriptor;
 
-typedef struct 
+typedef struct
 {
 	InterfaceDescriptor			msc;
 	EndpointDescriptor			in;
@@ -263,7 +263,7 @@ typedef struct
 	{ 18, 1, 0x200, _class,_subClass,_proto,_packetSize0,_vid,_pid,_version,_im,_ip,_is,_configs }
 
 #define D_CONFIG(_totalLength,_interfaces) \
-	{ 9, 2, _totalLength,_interfaces, 1, 0, USB_CONFIG_BUS_POWERED | USB_CONFIG_REMOTE_WAKEUP, USB_CONFIG_POWER_MA(500) }
+	{ 9, 2, _totalLength,_interfaces, 1, 0, USB_CONFIG_POWERED_MASK | USB_CONFIG_REMOTE_WAKEUP, USB_CONFIG_POWER_MA(100) }
 
 #define D_INTERFACE(_n,_numEndpoints,_class,_subClass,_protocol) \
 	{ 9, 4, _n, 0, _numEndpoints, _class,_subClass, _protocol, 0 }
