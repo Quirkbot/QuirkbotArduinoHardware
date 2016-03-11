@@ -59,6 +59,7 @@ npm run gulp -- deploy --environment=production
 ```
 npm publish
 ```
+- Create a git tag.
 - Make a manual [Github release](https://github.com/Quirkbot/QuirkbotArduinoHardware/releases) and upload the generated _quirkbot-arduino-hardware-*.zip_.
 - Make sure to update the [Unofficial list of 3rd party boards support urls](https://github.com/arduino/Arduino/wiki/Unofficial-list-of-3rd-party-boards-support-urls).
 
