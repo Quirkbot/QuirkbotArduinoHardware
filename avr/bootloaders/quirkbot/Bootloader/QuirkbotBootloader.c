@@ -145,14 +145,18 @@ void Application_Jump_Check(void)
 		&& (pgm_read_word_near(0) != 0xFFFF))
 	{
 		/* Turn off the watchdog */
-		MCUSR &= ~(1 << WDRF);
-		wdt_disable();
+		//MCUSR &= ~(1 << WDRF);
+		//wdt_disable();
+
+		/** Enable watchdog by default, the user application either needs to
+		 *  disable it, or reset it on a regular basis. This is to make sure
+		 *  that if the user code is faulty, the board will return automatically
+		 *  to booloader mode.
+		 */
+		wdt_enable(WDTO_2S);
 
 		/* Clear the boot key and jump to the user application */
 		MagicBootKey = 0;
-
-		/* Re-enable watchdog by default, user application can turn it off if needed. */
-		wdt_enable(WDTO_500MS);
 
 		// cppcheck-suppress constStatement
 		((void (*)(void))0x0000)();
