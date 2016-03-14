@@ -24,7 +24,8 @@ LUFA_PATH    = ../LUFA
 # Signatures to allow user program to detect if bootloader is installed.
 # 0x5142 is equal to "QB" in a char to hex conversion.
 BOOTLOADER_ID_SIG = 0x5142
-BOOTLOADER_VERSION_SIG = 0x0001
+# 0x6061 is equal to "01" in a ASCII.
+BOOTLOADER_VERSION_SIG = 0x6061
 
 CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -DBOOT_START_ADDR=$(BOOT_START_OFFSET) -DBOOTLOADER_ID_SIG=$(BOOTLOADER_ID_SIG) -DBOOTLOADER_VERSION_SIG=$(BOOTLOADER_VERSION_SIG)
 LD_FLAGS     = -Wl,--section-start=.text=$(BOOT_START_OFFSET) $(BOOT_API_LD_FLAGS)
