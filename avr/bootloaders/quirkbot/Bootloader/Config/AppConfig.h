@@ -50,7 +50,7 @@
 
 	#define DEVICE_SID "QUIRKBO"
 	#define DEVICE_VID 0x2886
-	#define DEVICE_PID 0xf005
+	#define DEVICE_PID 0xf006
 	#define BOOT_KEY 0x7777
 
 #endif
