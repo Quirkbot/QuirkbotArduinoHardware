@@ -12,6 +12,36 @@
 				{
 					"name": "Quirkbot AVR Boards",
 					"architecture": "avr",
+					"version": "0.4.4",
+					"category": "Contributed",
+					"url": "http://code.quirkbot.com/downloads/quirkbot-arduino-hardware-0.4.4.zip",
+					"archiveFileName": "quirkbot-arduino-hardware-0.4.4.zip",
+					"checksum": "SHA-256:c2f6a06c1aaff69631820bf5a14699688d59aa97d809404d793e18f155e4899d",
+					"size": "935798",
+					"help": {
+						"online": "https://github.com/Quirkbot/QuirkbotArduinoHardware/issues"
+					},
+					"boards": [
+						{
+							"name": "Quirkbot"
+						}
+					],
+					"toolsDependencies": [
+						{
+							"packager": "arduino",
+							"name": "avr-gcc",
+							"version": "4.8.1-arduino5"
+						},
+						{
+							"packager": "arduino",
+							"name": "avrdude",
+							"version": "6.0.1-arduino5"
+						}
+					]
+				},
+				{
+					"name": "Quirkbot AVR Boards",
+					"architecture": "avr",
 					"version": "0.4.3",
 					"category": "Contributed",
 					"url": "http://code.quirkbot.com/downloads/quirkbot-arduino-hardware-0.4.3.zip",
