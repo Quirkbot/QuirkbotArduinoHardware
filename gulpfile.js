@@ -11,7 +11,8 @@ var runSequence = require('run-sequence');
 var RELEASE_NAME = 'quirkbot-arduino-hardware';
 var PACKAGE_INDEX_NAME = 'quirkbot.com';
 var PACKAGE = JSON.parse(fs.readFileSync('package.json'));
-var ZIP_FILENAME = `${RELEASE_NAME}-${PACKAGE.version}.zip`;
+var VERSION_FILENAME = `${RELEASE_NAME}-${PACKAGE.version}.zip`;
+var LATEST_FILENAME = `${RELEASE_NAME}-latest.zip`;
 var PACKAGE_INDEX_FILENAME = `package_${PACKAGE_INDEX_NAME}_index.json`;
 
 /**
@@ -19,6 +20,7 @@ var PACKAGE_INDEX_FILENAME = `package_${PACKAGE_INDEX_NAME}_index.json`;
  */
 gulp.task('clean', function () {
 	return gulp.src([
+		LATEST_FILENAME,
 		RELEASE_NAME,
 		RELEASE_NAME + '-*.zip'
 	])
@@ -58,9 +60,10 @@ gulp.task('bundle:zip', function (cb){
 
 	exec(
 		`cd ${RELEASE_NAME}`
-		+ ` && zip -vr ${ZIP_FILENAME} avr -x "*.DS_Store"`
+		+ ` && zip -vr ${VERSION_FILENAME} avr -x "*.DS_Store"`
 		+ ` && cd ..`
-		+ ` && mv  ${path.join(RELEASE_NAME, ZIP_FILENAME)} ${ZIP_FILENAME}`
+		+ ` && mv  ${path.join(RELEASE_NAME, VERSION_FILENAME)} ${VERSION_FILENAME}`
+		+ ` && cp  ${VERSION_FILENAME} ${LATEST_FILENAME}`
 		+ ` && rm  -r ${RELEASE_NAME}`,
 		(error, stdout, stderr) => {
 			cb(error);
@@ -94,14 +97,14 @@ gulp.task('build', ['bundle'], function (cb) {
 
 	// Compute the size and checksum of the bundle
 	var execSync = require('child_process').execSync;
-	var size = execSync(`stat -f%z ${ZIP_FILENAME}`).toString().replace(/\W/g, '');
-	var checksum = execSync(`shasum -a 256 ${ZIP_FILENAME}`).toString()
-	.split(ZIP_FILENAME).join('').replace(/\W/g, '');
+	var size = execSync(`stat -f%z ${VERSION_FILENAME}`).toString().replace(/\W/g, '');
+	var checksum = execSync(`shasum -a 256 ${VERSION_FILENAME}`).toString()
+	.split(VERSION_FILENAME).join('').replace(/\W/g, '');
 
 	// Create the platform entry
 	var newPlatform = fs.readFileSync('index_platform.template.json').toString()
 	.split('{{VERSION}}').join(PACKAGE.version)
-	.split('{{FILENAME}}').join(ZIP_FILENAME)
+	.split('{{FILENAME}}').join(VERSION_FILENAME)
 	.split('{{SIZE}}').join(size)
 	.split('{{CHECKSUM}}').join(checksum);
 	newPlatform = JSON.parse(newPlatform);
@@ -130,7 +133,8 @@ gulp.task('s3', ['build'], function () {
 
 	return gulp.src([
 		PACKAGE_INDEX_FILENAME,
-		ZIP_FILENAME
+		VERSION_FILENAME,
+		LATEST_FILENAME
 	])
 	.pipe($.s3(aws, {
 		uploadPath: 'downloads/'

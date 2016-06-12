@@ -247,7 +247,7 @@ static void CDC_Task(void)
 
 	/* Check if endpoint has a command in it sent from the host */
 	if (!(Endpoint_IsOUTReceived()))
-	  return;
+		return;
 
 	/* LED feedback */
 	LEDs_ToggleLEDs(LEDS_LED1 | LEDS_LED2);
@@ -419,7 +419,7 @@ static uint8_t CDC_FetchNextCommandByte(void)
 		while (!(Endpoint_IsOUTReceived()))
 		{
 			if (USB_DeviceState == DEVICE_STATE_Unattached)
-			  return 0;
+				return 0;
 		}
 	}
 
@@ -456,7 +456,7 @@ static bool CDC_WaitDelivery(void)
 	while (!(Endpoint_IsINReady()))
 	{
 		if (USB_DeviceState == DEVICE_STATE_Unattached)
-		  return true;
+			return true;
 	}
 	return false;
 }
@@ -561,25 +561,28 @@ static void PushFirmwareByte(uint8_t FirmwareByte)
 		/* Once the buffer is full, write the page */
 		if(FirmwarePageIndex == SPM_PAGESIZE)
 		{
-			/* Erase whatever is currently on the page  */
-			boot_page_erase(CurrAddress);
-			/* Wait until removal operation has completed */
-			boot_spm_busy_wait();
+			/* Don't allow to write data over the bootloader space */
+			if(CurrAddress < BOOT_START_ADDR){
+				/* Erase whatever is currently on the page  */
+				boot_page_erase(CurrAddress);
+				/* Wait until removal operation has completed */
+				boot_spm_busy_wait();
 
-			/* Loop through the page buffer and fill the new page words */
-			for (uint8_t i = 0; i < SPM_PAGESIZE; i+= 2) {
-				/* The words are Little Endian, so watch out for the order of the bytes */
-				uint16_t word = (FirmwarePageBuffer[i+1] << 8) | FirmwarePageBuffer[i];
-				boot_page_fill(CurrAddress + i, word);
+				/* Loop through the page buffer and fill the new page words */
+				for (uint8_t i = 0; i < SPM_PAGESIZE; i+= 2) {
+					/* The words are Little Endian, so watch out for the order of the bytes */
+					uint16_t word = (FirmwarePageBuffer[i+1] << 8) | FirmwarePageBuffer[i];
+					boot_page_fill(CurrAddress + i, word);
+				}
+
+				/* Commit the flash page to memory */
+				boot_page_write(CurrAddress);
+				/* Wait until write operation has completed */
+				boot_spm_busy_wait();
+
+				/* Reenable RWW-section again. We need this if we want to jump back to the application after bootloading.*/
+				boot_rww_enable ();
 			}
-
-			/* Commit the flash page to memory */
-			boot_page_write(CurrAddress);
-			/* Wait until write operation has completed */
-			boot_spm_busy_wait();
-
-			/* Reenable RWW-section again. We need this if we want to jump back to the application after bootloading.*/
-			boot_rww_enable ();
 
 			/* Advance the CurrAddress a whole page */
 			CurrAddress += SPM_PAGESIZE;
