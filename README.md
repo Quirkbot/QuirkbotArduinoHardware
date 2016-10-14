@@ -74,10 +74,10 @@ Check what is the latest version at the [package index](http://downloads.arduino
 You need to patch the `D_CONFIG` macro from `USBCore.h` so it reports the board as self powered and with a maximum consumption of 100mA.
 ```
 #define D_CONFIG(_totalLength,_interfaces) \
-	{ 9, 2, _totalLength,_interfaces, 1, 0, USB_CONFIG_POWERED_MASK | USB_CONFIG_REMOTE_WAKEUP, USB_CONFIG_POWER_MA(100) }
+	{ 9, 2, _totalLength,_interfaces, 1, 0, USB_CONFIG_SELF_POWERED | USB_CONFIG_REMOTE_WAKEUP, USB_CONFIG_POWER_MA(100) }
 ```
 
-You need to patch `CDC.cpp` auto-reset routine. Replace the content of lines 95 - 137 with:
+You need to patch `CDC.cpp` auto-reset routine. Replace the content of lines 97 - 151 with:
 ```
 if (CDC_SET_LINE_CODING == r || CDC_SET_CONTROL_LINE_STATE == r)
 {

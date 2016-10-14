@@ -34,6 +34,8 @@ typedef struct
 static volatile LineInfo _usbLineInfo = { 57600, 0x00, 0x00, 0x00, 0x00 };
 static volatile int32_t breakValue = -1;
 
+bool _updatedLUFAbootloader = false;
+
 #define WEAK __attribute__ ((weak))
 
 extern const CDCDescriptor _cdcInterface PROGMEM;
@@ -94,12 +96,6 @@ bool CDC_Setup(USBSetup& setup)
 
 		if (CDC_SET_LINE_CODING == r || CDC_SET_CONTROL_LINE_STATE == r)
 		{
-			// auto-reset into the bootloader is triggered when the port, already
-			// open at 1200 bps, is closed.  this is the signal to start the watchdog
-			// with a relatively long period so it can finish housekeeping tasks
-			// like servicing endpoints before the sketch ends
-
-			// We check DTR state to determine if host port is open (bit 0 of lineState).
 			if (1200 == _usbLineInfo.dwDTERate && (_usbLineInfo.lineState & 0x01) == 0)
 			{
 				*(uint16_t *)0x0800 = 0x7777;
@@ -108,10 +104,6 @@ bool CDC_Setup(USBSetup& setup)
 			}
 			else
 			{
-				// Most OSs do some intermediate steps when configuring ports and DTR can
-				// twiggle more than once before stabilizing.
-				// To avoid spurious resets we set the watchdog to 250ms and eventually
-				// cancel if DTR goes back high.
 				wdt_disable();
 				wdt_reset();
 			}
