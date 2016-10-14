@@ -3,7 +3,7 @@
 	"architecture": "avr",
 	"version": "{{VERSION}}",
 	"category": "Contributed",
-	"url": "http://code.quirkbot.com/downloads/{{FILENAME}}",
+	"url": "http://github.com/Quirkbot/QuirkbotArduinoHardware/releases/download/{{VERSION}}/{{FILENAME}}",
 	"archiveFileName": "{{FILENAME}}",
 	"checksum": "SHA-256:{{CHECKSUM}}",
 	"size": "{{SIZE}}",
