@@ -120,9 +120,12 @@ if (n == 0)
 
 ### Libraries
 ##### HID
-Copied from *Arduino AVR Boards*.
+Copied from *Arduino AVR Boards*.`*`
 
-Check what is the latest version at the [package index](http://downloads.arduino.cc/packages/package_index.json).
+##### Wire
+Copied from *Arduino AVR Boards*.`*`
+
+`(*)`Check what is the latest version at the [package index](http://downloads.arduino.cc/packages/package_index.json).
 
 ##### Servo
 From git - https://github.com/Quirkbot/Servo
