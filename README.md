@@ -47,11 +47,7 @@ Before deploying, please run the "Building Releases" instructions and make sure
 everything works as desired. When you are ready to deploy:
 
 - Update the version in `package.json`
-- Run:
-```
-npm run gulp -- deploy --environment=stage
-```
-or
+- Run
 ```
 npm run gulp -- deploy --environment=production
 ```
