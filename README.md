@@ -118,6 +118,14 @@ if (n == 0)
 ##### HID
 Copied from *Arduino AVR Boards*.`*`
 
+You need to patch the `getShortName` function from `HID.cpp` so it doesn't set any name (we don't want Arduino to set a serial number in the USB descriptors):
+```
+uint8_t HID_::getShortName(char* name)
+{
+    return 0;
+}
+```
+
 ##### Wire
 Copied from *Arduino AVR Boards*.`*`
 
