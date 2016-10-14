@@ -54,11 +54,11 @@ int HID_::getDescriptor(USBSetup& setup)
 			return -1;
 		total += res;
 	}
-
+	
 	// Reset the protocol on reenumeration. Normally the host should not assume the state of the protocol
 	// due to the USB specs, but Windows and Linux just assumes its in report mode.
 	protocol = HID_REPORT_PROTOCOL;
-
+	
 	return total;
 }
 
@@ -69,7 +69,7 @@ uint8_t HID_::getShortName(char *name)
 	name[2] = 'D';
 	name[3] = 'A' + (descriptorSize & 0x0F);
 	name[4] = 'A' + ((descriptorSize >> 4) & 0x0F);
-	return 0;
+	return 5;
 }
 
 void HID_::AppendDescriptor(HIDSubDescriptor *node)
