@@ -43,6 +43,8 @@
 #define BP6	1 	// Back Pack 6		(PD3)	TXD1
 #define SERVO_BP1 BP6
 #define SERVO_BP2 BP3
+#define SERVO_MOTOR_1 BP6
+#define SERVO_MOTOR_2 BP3
 
 // Pull up pin
 #define PULL_UP_PIN 4
