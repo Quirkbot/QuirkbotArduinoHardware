@@ -62,7 +62,7 @@ int HID_::getDescriptor(USBSetup& setup)
 	return total;
 }
 
-uint8_t HID_::getShortName(char *name)
+uint8_t HID_::getShortName(char*)
 {
 	return 0;
 }

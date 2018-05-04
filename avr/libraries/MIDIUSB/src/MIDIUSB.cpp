@@ -69,7 +69,7 @@ int MIDI_::getDescriptor(USBSetup& setup __attribute__((unused)))
 	return 0;
 }
 
-uint8_t MIDI_::getShortName(char* name)
+uint8_t MIDI_::getShortName(char*)
 {
 	return 0;
 }
