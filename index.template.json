@@ -1,10 +1,10 @@
 {
 	"packages": [
 		{
-			"name": "quirkbot",
-			"maintainer": "Quirkbot",
+			"name": "strawbees-quirkbot",
+			"maintainer": "Strawbees",
 			"websiteURL": "https://github.com/Quirkbot/QuirkbotArduinoHardware",
-			"email": "support@quirkbot.com",
+			"email": "support@strawbees.com",
 			"help": {
 				"online": "https://github.com/Quirkbot/QuirkbotArduinoHardware/issues"
 			},
