@@ -1,5 +1,5 @@
 {
-	"name": "Quirkbot AVR Boards",
+	"name": "Strawbees Quirkbot AVR Boards",
 	"architecture": "avr",
 	"version": "{{VERSION}}",
 	"category": "Contributed",
@@ -12,7 +12,7 @@
 	},
 	"boards": [
 		{
-			"name": "Quirkbot"
+			"name": "Strawbees Quirkbot"
 		}
 	],
 	"toolsDependencies": [
