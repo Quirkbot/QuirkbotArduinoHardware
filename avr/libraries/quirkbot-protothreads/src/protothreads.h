@@ -2,16 +2,22 @@
 #include "pt-sleep.h"
 
 /**
-* ADDED BY STRAWBEES
+* Simplifed interface
+* -------------------
+* Author: Strawbees
 * Provides a simplied interface to Protothreads.
 */
 #define PT_POINTER_VAR(name) pt_##name##_pointer
 #define PT_THREAD_VAR(name) pt_##name##_thread
 
-#define ptDefine(name, ...)\
+#define ptDeclare(name, ...)\
 	static struct pt PT_POINTER_VAR(name);\
-	static PT_THREAD (PT_THREAD_VAR(name)(struct pt* __pt__, ##__VA_ARGS__));
-#define ptDeclare(name, ...) static PT_THREAD (PT_THREAD_VAR(name)(struct pt* __pt__, ##__VA_ARGS__))
+	static PT_THREAD (PT_THREAD_VAR(name)(struct pt* __pt__, ##__VA_ARGS__))
+#define ptDeclareThread ptDeclare
+#define ptDeclareProcedure ptDeclare
+#define ptDefine(name, ...) static PT_THREAD (PT_THREAD_VAR(name)(struct pt* __pt__, ##__VA_ARGS__))
+#define ptDefineThread ptDefine
+#define ptDefineProcedure ptDefine
 #define ptInit(name) PT_INIT(&PT_POINTER_VAR(name))
 #define ptBegin() PT_BEGIN(__pt__)
 #define ptSleep(ms) PT_SLEEP(__pt__, ms)
@@ -25,3 +31,7 @@
 #define ptExit() PT_EXIT(__pt__)
 #define ptEnd() PT_END(__pt__)
 #define ptSchedule(name, ...) PT_SCHEDULE(PT_THREAD_VAR(name)(&PT_POINTER_VAR(name), ##__VA_ARGS__))
+#define ptBeginThread() ptBegin()
+#define ptBeginProcedure() ptBegin();ptYield()
+#define ptEndThread() ptYieldUntil(false);ptEnd()
+#define ptEndProcedure() ptExit();ptEnd()
