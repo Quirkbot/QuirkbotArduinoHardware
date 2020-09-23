@@ -1,27 +1,6 @@
 *This library has been modified by Strawbees (https://strawbees.com) in order to
 better integrate with the Quirkbot.*
 
-If the it gets included inside `Quirkbot.h`, the macros will be modified, including calls to `Bot::uptate()`.
-
-A simplified interface to macros is also provided:
-```
-ptDefine(name)
-ptDeclare(name)
-ptInit(name)
-ptBegin()
-ptSleep(ms)
-ptWaitUntil(condition)
-ptWaitWhile(condition)
-ptWaitThread(name)
-ptYield()
-ptYieldUntil(condition)
-ptSpawn(name)
-ptRestart()
-ptExit()
-ptEnd()
-ptSchedule(name)
-```
-
 --------------------------------------------------------------------------------
 *Protothreads* are extremely lightweight stackless threads designed for
 severely memory constrained systems.
