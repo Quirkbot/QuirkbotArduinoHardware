@@ -70,11 +70,20 @@
 	PT_EXIT(_pt_);\
 	PT_END(_pt_)
 
-#define sleep(sec)\
-	PT_SLEEP(_pt_, (float)sec * 1000)
+#define wait(seconds)\
+	PT_SLEEP(_pt_, (float)seconds * 1000)
 
-#define yield(sec)\
+#define yield()\
 	PT_YIELD(_pt_)
+
+#define yieldUntil(condition)\
+	PT_YIELD_UNTIL(_pt_, condition)
+
+#define waitUntil(condition)\
+	PT_WAIT_UNTIL(_pt_, condition)
+
+#define waitWhile(condition)\
+	PT_WAIT_WHILE(_pt_, condition)
 
 #define initEvent(name)\
 	PT_INIT(&name##_pointer)
