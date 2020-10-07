@@ -7,7 +7,10 @@ initEvent	KEYWORD2
 registerBlock	KEYWORD2
 registerEvent	KEYWORD2
 scheduleEvent	KEYWORD2
-sleep	KEYWORD2
+wait	KEYWORD2
+waitUntil	KEYWORD2
+waitWhile	KEYWORD2
 spawnBlock	KEYWORD2
 yield	KEYWORD2
+yieldUntil	KEYWORD2
 THREAD	KEYWORD1
