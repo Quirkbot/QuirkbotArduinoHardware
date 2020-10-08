@@ -35,17 +35,17 @@
 	_17,_18,NAME,...) NAME
 
 #define registerEvent(name)\
-	static char name##_starts(struct pt *);\
-	static struct pt name##_pointer
+	PT_THREAD(name##_starts(struct pt *));\
+	struct pt name##_pointer
 
 #define registerBlock(name, num_args)\
-	static float name##_args[num_args];\
-	static char name(struct pt *, float[num_args]);\
-	static struct pt name##_pointer;\
-	static char name##_rec (struct pt * pt){\
-		PT_BEGIN(pt);\
-		PT_SPAWN(pt, &name##_pointer, name(&name##_pointer));\
-		PT_END(pt);\
+	float name##_args[num_args];\
+	PT_THREAD(name(struct pt *, float[num_args]));\
+	struct pt name##_pointer;\
+	PT_THREAD(name##_rec (struct pt * _pt_)){\
+		PT_BEGIN(_pt_);\
+		PT_SPAWN(_pt_, &name##_pointer, name(&name##_pointer));\
+		PT_END(_pt_);\
 	}\
 	struct pt name##_rec_pointer
 
@@ -53,7 +53,13 @@
 	name##_args[i]
 
 #define THREAD(name)\
-	static char name(pt * _pt_)
+	PT_THREAD(name(pt * _pt_))
+
+#define threadBegin()\
+	PT_BEGIN(_pt_)
+
+#define threadEnd()\
+	PT_END(_pt_)
 
 #define eventBegin()\
 	PT_BEGIN(_pt_)
@@ -63,7 +69,7 @@
 	PT_END(_pt_)
 
 #define blockBegin()\
-	PT_BEGIN(_pt_)\
+	PT_BEGIN(_pt_);\
 	PT_YIELD(_pt_)
 
 #define blockEnd()\
