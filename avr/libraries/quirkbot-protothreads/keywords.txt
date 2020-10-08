@@ -13,4 +13,6 @@ waitWhile	KEYWORD2
 spawnBlock	KEYWORD2
 yield	KEYWORD2
 yieldUntil	KEYWORD2
+threadBegin	KEYWORD2
+threadEnd	KEYWORD2
 THREAD	KEYWORD1

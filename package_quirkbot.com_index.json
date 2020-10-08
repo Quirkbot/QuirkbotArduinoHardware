@@ -12,6 +12,36 @@
 				{
 					"name": "Strawbees Quirkbot AVR Boards",
 					"architecture": "avr",
+					"version": "0.6.2",
+					"category": "Contributed",
+					"url": "http://github.com/Quirkbot/QuirkbotArduinoHardware/releases/download/0.6.2/quirkbot-arduino-hardware-0.6.2.zip",
+					"archiveFileName": "quirkbot-arduino-hardware-0.6.2.zip",
+					"checksum": "SHA-256:302dcdcfa39450ce78164509fe8399b53039bdd027f7c114bc790180310b17bc",
+					"size": "998490",
+					"help": {
+						"online": "https://github.com/Quirkbot/QuirkbotArduinoHardware/issues"
+					},
+					"boards": [
+						{
+							"name": "Strawbees Quirkbot"
+						}
+					],
+					"toolsDependencies": [
+						{
+							"packager": "arduino",
+							"name": "avr-gcc",
+							"version": "7.3.0-atmel3.6.1-arduino7"
+						},
+						{
+							"packager": "arduino",
+							"name": "avrdude",
+							"version": "6.3.0-arduino17"
+						}
+					]
+				},
+				{
+					"name": "Strawbees Quirkbot AVR Boards",
+					"architecture": "avr",
 					"version": "0.6.1",
 					"category": "Contributed",
 					"url": "http://github.com/Quirkbot/QuirkbotArduinoHardware/releases/download/0.6.1/quirkbot-arduino-hardware-0.6.1.zip",
