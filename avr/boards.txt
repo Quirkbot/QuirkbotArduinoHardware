@@ -31,7 +31,9 @@ quirkbot.build.vid=0x2886
 quirkbot.build.pid=0xf004
 quirkbot.build.usb_product="Quirkbot"
 quirkbot.build.usb_manufacturer="Quirkbot"
+quirkbot.build.usb_serial="Quirkbot"
+quirkbot.build.usb_config_power=100
 quirkbot.build.board=AVR_QUIRKBOT
 quirkbot.build.core=arduino
 quirkbot.build.variant=quirkbot
-quirkbot.build.extra_flags={build.usb_flags}
+quirkbot.build.extra_flags={build.usb_flags} '-DUSB_SERIAL={build.usb_serial}' '-DUSB_CONFIG_POWER={build.usb_config_power}'

@@ -33,25 +33,17 @@ Check what is the latest version at the [package index](http://downloads.arduino
 You need to patch the `D_CONFIG` macro from `USBCore.h` so it reports the board as self powered and with a maximum consumption of 100mA.
 ```
 #define D_CONFIG(_totalLength,_interfaces) \
-	{ 9, 2, _totalLength,_interfaces, 1, 0, USB_CONFIG_SELF_POWERED | USB_CONFIG_REMOTE_WAKEUP, USB_CONFIG_POWER_MA(100) }
+	{ 9, 2, _totalLength,_interfaces, 1, 0, USB_CONFIG_SELF_POWERED | USB_CONFIG_REMOTE_WAKEUP, USB_CONFIG_POWER_MA(USB_CONFIG_POWER) }
 ```
 
-You need to patch `CDC.cpp` auto-reset routine. Replace the content of lines 97 - 151 with:
+You need to patch `CDC.cpp` auto-reset routine. Add the line `for (;;);` right after the `wdt_enable(WDTO_120MS);`:
 ```
-if (CDC_SET_LINE_CODING == r || CDC_SET_CONTROL_LINE_STATE == r)
-{
-	if (1200 == _usbLineInfo.dwDTERate && (_usbLineInfo.lineState & 0x01) == 0)
-	{
-		*(uint16_t *)0x0800 = 0x7777;
-		wdt_enable(WDTO_120MS);
-		for (;;);
-	}
-	else
-	{
-		wdt_disable();
-		wdt_reset();
-	}
-}
+// Store boot key
+*(uint16_t *)magic_key_pos = MAGIC_KEY;
+// Save the watchdog state in case the reset is aborted.
+wdtcsr_save = WDTCSR;
+wdt_enable(WDTO_120MS);
+for (;;); // add this line
 ```
 
 You need to patch `USBCore.cpp` `USB_Send` function. We want to remove the 250
@@ -59,35 +51,16 @@ timeout completely.
 
 Replace the block:
 ```
-u8 n = USB_SendSpace(ep);
-if (n == 0)
-{
-    if (!(--timeout))
-        return -1;
-    delay(1);
-    continue;
-}
+u8 timeout = 250;
 ```
 With:
 ```
-u8 n = USB_SendSpace(ep);
-if (n == 0)
-{
-    return -1;
-}
+u8 timeout = 0;
 ```
 
 ### Libraries
 ##### HID
 Copied from *Arduino AVR Boards*.`*`
-
-You need to patch the `getShortName` function from `HID.cpp` so it doesn't set any name (we don't want Arduino to set a serial number in the USB descriptors):
-```
-uint8_t HID_::getShortName(char*)
-{
-    return 0;
-}
-```
 
 ##### Wire
 Copied from *Arduino AVR Boards*.`*`
@@ -105,11 +78,3 @@ From git - https://github.com/Quirkbot/Mouse
 
 ##### MIDIUSB
 From git - https://github.com/Quirkbot/MIDIUSB
-
-You need to patch the `getShortName` function from `MIDIUSB.cpp` so it doesn't set any name (we don't want Arduino to set a serial number in the USB descriptors):
-```
-uint8_t MIDI_::getShortName(char*)
-{
-    return 0;
-}
-```

@@ -35,7 +35,6 @@ extern const u16 STRING_LANGUAGE[] PROGMEM;
 extern const u8 STRING_PRODUCT[] PROGMEM;
 extern const u8 STRING_MANUFACTURER[] PROGMEM;
 extern const DeviceDescriptor USB_DeviceDescriptorIAD PROGMEM;
-extern bool _updatedLUFAbootloader;
 
 const u16 STRING_LANGUAGE[2] = {
 	(3<<8) | (2+2),
@@ -65,6 +64,13 @@ const u8 STRING_PRODUCT[] PROGMEM = USB_PRODUCT;
 #endif
 
 const u8 STRING_MANUFACTURER[] PROGMEM = USB_MANUFACTURER;
+
+#ifndef USB_SERIAL
+// If no serial is provided, use Quirkbot
+#define USB_SERIAL     "Quirkbot"
+#endif
+
+const u8 STRING_SERIAL[] PROGMEM = USB_SERIAL;
 
 
 #define DEVICE_CLASS 0x02
@@ -268,7 +274,7 @@ int USB_Send(u8 ep, const void* d, int len)
 
 	int r = len;
 	const u8* data = (const u8*)d;
-	u8 timeout = 250;		// 250ms timeout on send? TODO
+	u8 timeout = 0;		// 250ms timeout on send? TODO
 	bool sendZlp = false;
 
 	while (len || sendZlp)
@@ -276,7 +282,10 @@ int USB_Send(u8 ep, const void* d, int len)
 		u8 n = USB_SendSpace(ep);
 		if (n == 0)
 		{
-			return -1;
+			if (!(--timeout))
+				return -1;
+			delay(1);
+			continue;
 		}
 
 		if (n > len) {
@@ -494,14 +503,13 @@ bool SendConfiguration(int maxlen)
 static
 bool SendDescriptor(USBSetup& setup)
 {
-	int ret;
 	u8 t = setup.wValueH;
 	if (USB_CONFIGURATION_DESCRIPTOR_TYPE == t)
 		return SendConfiguration(setup.wLength);
 
 	InitControl(setup.wLength);
 #ifdef PLUGGABLE_USB_ENABLED
-	ret = PluggableUSB().getDescriptor(setup);
+	int ret = PluggableUSB().getDescriptor(setup);
 	if (ret != 0) {
 		return (ret > 0 ? true : false);
 	}
@@ -524,11 +532,7 @@ bool SendDescriptor(USBSetup& setup)
 			return USB_SendStringDescriptor(STRING_MANUFACTURER, strlen(USB_MANUFACTURER), TRANSFER_PGM);
 		}
 		else if (setup.wValueL == ISERIAL) {
-#ifdef PLUGGABLE_USB_ENABLED
-			char name[ISERIAL_MAX_LEN];
-			PluggableUSB().getShortName(name);
-			return USB_SendStringDescriptor((uint8_t*)name, strlen(name), 0);
-#endif
+			return USB_SendStringDescriptor(STRING_SERIAL, strlen(USB_SERIAL), TRANSFER_PGM);
 		}
 		else
 			return false;
@@ -816,12 +820,6 @@ void USBDevice_::attach()
 	UDIEN = (1<<EORSTE) | (1<<SOFE) | (1<<SUSPE);	// Enable interrupts for EOR (End of Reset), SOF (start of frame) and SUSPEND
 
 	TX_RX_LED_INIT;
-
-#if MAGIC_KEY_POS != (RAMEND-1)
-	if (pgm_read_word(FLASHEND - 1) == NEW_LUFA_SIGNATURE) {
-		_updatedLUFAbootloader = true;
-	}
-#endif
 }
 
 void USBDevice_::detach()
@@ -858,5 +856,11 @@ bool USBDevice_::wakeupHost()
 
 	return false;
 }
+
+bool USBDevice_::isSuspended()
+{
+	return (_usbSuspendState & (1 << SUSPI));
+}
+
 
 #endif /* if defined(USBCON) */

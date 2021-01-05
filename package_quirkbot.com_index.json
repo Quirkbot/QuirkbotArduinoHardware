@@ -12,6 +12,66 @@
 				{
 					"name": "Strawbees Quirkbot AVR Boards",
 					"architecture": "avr",
+					"version": "0.7.0",
+					"category": "Contributed",
+					"url": "http://github.com/Quirkbot/QuirkbotArduinoHardware/releases/download/0.7.0/quirkbot-arduino-hardware-0.7.0.zip",
+					"archiveFileName": "quirkbot-arduino-hardware-0.7.0.zip",
+					"checksum": "SHA-256:71759b0011393f05de464acd45a647c27c6ab173fb81985ec27b88f21163d451",
+					"size": "1000123",
+					"help": {
+						"online": "https://github.com/Quirkbot/QuirkbotArduinoHardware/issues"
+					},
+					"boards": [
+						{
+							"name": "Strawbees Quirkbot"
+						}
+					],
+					"toolsDependencies": [
+						{
+							"packager": "arduino",
+							"name": "avr-gcc",
+							"version": "7.3.0-atmel3.6.1-arduino7"
+						},
+						{
+							"packager": "arduino",
+							"name": "avrdude",
+							"version": "6.3.0-arduino17"
+						}
+					]
+				},
+				{
+					"name": "Strawbees Quirkbot AVR Boards",
+					"architecture": "avr",
+					"version": "0.6.3",
+					"category": "Contributed",
+					"url": "http://github.com/Quirkbot/QuirkbotArduinoHardware/releases/download/0.6.3/quirkbot-arduino-hardware-0.6.3.zip",
+					"archiveFileName": "quirkbot-arduino-hardware-0.6.3.zip",
+					"checksum": "SHA-256:bf1395f299e93d95e87b27256dee645f3d467fa6c9345b409b8a9162f74c1cb8",
+					"size": "1000123",
+					"help": {
+						"online": "https://github.com/Quirkbot/QuirkbotArduinoHardware/issues"
+					},
+					"boards": [
+						{
+							"name": "Strawbees Quirkbot"
+						}
+					],
+					"toolsDependencies": [
+						{
+							"packager": "arduino",
+							"name": "avr-gcc",
+							"version": "7.3.0-atmel3.6.1-arduino7"
+						},
+						{
+							"packager": "arduino",
+							"name": "avrdude",
+							"version": "6.3.0-arduino17"
+						}
+					]
+				},
+				{
+					"name": "Strawbees Quirkbot AVR Boards",
+					"architecture": "avr",
 					"version": "0.6.2",
 					"category": "Contributed",
 					"url": "http://github.com/Quirkbot/QuirkbotArduinoHardware/releases/download/0.6.2/quirkbot-arduino-hardware-0.6.2.zip",
