@@ -40,7 +40,7 @@
 
 #define registerBlock(name, num_args)\
 	float name##_args[num_args];\
-	PT_THREAD(name(struct pt *, float[num_args]));\
+	PT_THREAD(name(struct pt *));\
 	struct pt name##_pointer;\
 	PT_THREAD(name##_rec (struct pt * _pt_)){\
 		PT_BEGIN(_pt_);\
