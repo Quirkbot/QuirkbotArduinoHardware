@@ -208,6 +208,7 @@
 			STRING_ID_Language     = 0, /**< Supported Languages string descriptor ID (must be zero) */
 			STRING_ID_Manufacturer = 1, /**< Manufacturer string ID */
 			STRING_ID_Product      = 2, /**< Product string ID */
+			STRING_ID_SerialNumber = 3, /**< Serial number string ID */
 		};
 
 	/* Function Prototypes: */
@@ -217,4 +218,3 @@
 		                                    ATTR_WARN_UNUSED_RESULT ATTR_NON_NULL_PTR_ARG(3);
 
 #endif
-

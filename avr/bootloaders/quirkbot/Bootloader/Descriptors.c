@@ -90,7 +90,7 @@ const USB_Descriptor_Device_t DeviceDescriptor =
 
 	.ManufacturerStrIndex   = STRING_ID_Manufacturer,
 	.ProductStrIndex        = STRING_ID_Product,
-	.SerialNumStrIndex      = NO_DESCRIPTOR,
+	.SerialNumStrIndex      = STRING_ID_SerialNumber,
 
 	.NumberOfConfigurations = FIXED_NUM_CONFIGURATIONS
 };
@@ -444,7 +444,7 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 			Address = &LanguageString;
 			Size    = LanguageString.Header.Size;
 		}
-		else if (DescriptorNumber == STRING_ID_Manufacturer || DescriptorNumber == STRING_ID_Product)
+		else if (DescriptorNumber == STRING_ID_Manufacturer || DescriptorNumber == STRING_ID_Product || DescriptorNumber == STRING_ID_SerialNumber)
 		{
 			Address = &ProductString;
 			Size    = ProductString.Header.Size;
@@ -454,4 +454,3 @@ uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue,
 	*DescriptorAddress = Address;
 	return Size;
 }
-
