@@ -51,11 +51,22 @@ timeout completely.
 
 Replace the block:
 ```
-u8 timeout = 250;
+u8 n = USB_SendSpace(ep);
+if (n == 0)
+{
+    if (!(--timeout))
+        return -1;
+    delay(1);
+    continue;
+}
 ```
 With:
 ```
-u8 timeout = 0;
+u8 n = USB_SendSpace(ep);
+if (n == 0)
+{
+    return -1;
+}
 ```
 
 ### Libraries

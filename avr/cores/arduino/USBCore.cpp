@@ -274,7 +274,7 @@ int USB_Send(u8 ep, const void* d, int len)
 
 	int r = len;
 	const u8* data = (const u8*)d;
-	u8 timeout = 0;		// 250ms timeout on send? TODO
+	u8 timeout = 250;		// 250ms timeout on send? TODO
 	bool sendZlp = false;
 
 	while (len || sendZlp)
@@ -282,10 +282,7 @@ int USB_Send(u8 ep, const void* d, int len)
 		u8 n = USB_SendSpace(ep);
 		if (n == 0)
 		{
-			if (!(--timeout))
-				return -1;
-			delay(1);
-			continue;
+			return -1;
 		}
 
 		if (n > len) {
