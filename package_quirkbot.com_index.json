@@ -14,7 +14,7 @@
 					"architecture": "avr",
 					"version": "0.8.1",
 					"category": "Contributed",
-					"url": "http://github.com/Quirkbot/QuirkbotArduinoHardware/releases/download/0.8.1/quirkbot-arduino-hardware-0.8.1.zip",
+					"url": "http://github.com/Quirkbot/QuirkbotArduinoHardware/releases/download/v0.8.1/quirkbot-arduino-hardware-0.8.1.zip",
 					"archiveFileName": "quirkbot-arduino-hardware-0.8.1.zip",
 					"checksum": "SHA-256:cb3785745b14d04ac17aed0c2c8b282a67c24f34cc6bae0ab2885339db8e668e",
 					"size": "1000073",
