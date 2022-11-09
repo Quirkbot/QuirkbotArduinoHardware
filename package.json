@@ -7,7 +7,7 @@
   "license": "SEE LICENSE IN LICENSE.txt",
   "devDependencies": {
     "del": "^2.2.0",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.2",
     "gulp-clean": "^0.3.2",
     "gulp-load-plugins": "^1.2.0",
     "gulp-prompt": "^0.1.2",
